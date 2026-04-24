@@ -8,14 +8,13 @@ from app.config.settings import settings
 class S3Storage:
     """
     Clase general para manejar almacenamiento en S3 o MinIO usando boto3.
-    Elige el backend según settings.s3_provider: 'aws' o 'minio'.
+    Elige el backend según settings.app_env: 'dev' (MinIO) o 'prod' (AWS S3).
     """
 
     def __init__(self):
-        provider = settings.s3_provider.lower()
-        self.provider = provider
-
-        if provider == "aws":
+        env = settings.app_env.lower()
+        self.env = env
+        if env in ("prod", "production"):
             self.bucket_name = settings.aws_s3_bucket_name
             self.s3_client = boto3.client(
                 "s3",
@@ -46,10 +45,19 @@ class S3Storage:
                 Key=full_path,
                 Body=file_data,
             )
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "")
+            if error_code == "NoSuchBucket":
+                self.create_bucket_if_not_exists()
+                self.s3_client.put_object(
+                    Bucket=self.bucket_name,
+                    Key=full_path,
+                    Body=file_data,
+                )
+            else:
+                raise Exception(f"Error al escribir el archivo en el bucket: {str(e)}")
         except Exception as e:
-            raise Exception(
-                f"Error al escribir el archivo en {self.provider}: {str(e)}"
-            )
+            raise Exception(f"Error al escribir el archivo en el bucket: {str(e)}")
 
         return full_path
 
@@ -59,10 +67,9 @@ class S3Storage:
         """
         full_path = self._build_path(folder, object_name)
 
-        if self.provider == "minio":
+        if self.env in ("dev", "development"):
             endpoint = settings.minio_endpoint.rstrip("/")
             return f"{endpoint}/{self.bucket_name}/{full_path}"
-
         return f"https://{self.bucket_name}.s3.amazonaws.com/{full_path}"
 
     def generate_presigned_url(self, folder, object_name, expiration=3600):
@@ -97,9 +104,7 @@ class S3Storage:
                 Key=full_path,
             )
         except Exception as e:
-            raise Exception(
-                f"Error al eliminar el archivo en {self.provider}: {str(e)}"
-            )
+            raise Exception(f"Error al eliminar el archivo en el bucket: {str(e)}")
 
     def delete_objects(self, folder, object_keys):
         """
@@ -125,7 +130,7 @@ class S3Storage:
                 },
             )
         except Exception as e:
-            raise Exception(f"Error al eliminar archivos en {self.provider}: {str(e)}")
+            raise Exception(f"Error al eliminar archivos en el bucket: {str(e)}")
 
     def bucket_exists(self):
         """
@@ -146,18 +151,21 @@ class S3Storage:
             return
 
         try:
-            if self.provider == "aws":
-                self.s3_client.create_bucket(
-                    Bucket=self.bucket_name,
-                    CreateBucketConfiguration={
-                        "LocationConstraint": settings.aws_region_name,
-                    },
-                )
+            if self.env in ("prod", "production"):
+                if settings.aws_region_name == "us-east-1":
+                    self.s3_client.create_bucket(Bucket=self.bucket_name)
+                else:
+                    self.s3_client.create_bucket(
+                        Bucket=self.bucket_name,
+                        CreateBucketConfiguration={
+                            "LocationConstraint": settings.aws_region_name,
+                        },
+                    )
             else:
                 self.s3_client.create_bucket(Bucket=self.bucket_name)
 
         except Exception as e:
-            raise Exception(f"Error al crear el bucket en {self.provider}: {str(e)}")
+            raise Exception(f"Error al crear el bucket: {str(e)}")
 
     def _build_path(self, folder, object_name):
         """

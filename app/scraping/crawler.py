@@ -9,7 +9,28 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
 
+from app.config.settings import settings
 from app.scraping.fetcher import HtmlFetcher
+from app.services.s3_storage import S3Storage
+
+
+def save_html_and_upload_s3(
+    html: str, fname: str, out_dir: str, s3_folder: str = "bbva_html"
+):
+    """
+    Guarda el HTML localmente (si es dev) y siempre lo sube a S3/MinIO.
+    """
+    # Guardar local solo en desarrollo
+    if settings.app_env.lower() in ("dev", "development"):
+        os.makedirs(out_dir, exist_ok=True)
+        fpath = os.path.join(out_dir, fname)
+        with open(fpath, "w", encoding="utf-8") as f:
+            f.write(html)
+    # Subir a S3/MinIO
+    s3 = S3Storage()
+    s3.create_bucket_if_not_exists()
+    s3.write_file(s3_folder, fname, html.encode("utf-8"))
+    return True
 
 
 class ScrapedSection(BaseModel):
@@ -77,11 +98,9 @@ def crawl_and_save(
                     and base_domain in full_url
                 ):
                     internal_links.append(full_url)
-        # Guardar HTML
+        # Guardar HTML local y en S3/MinIO
         fname = f"bbva_{page_count+1}.html"
-        fpath = os.path.join(out_dir, fname)
-        with open(fpath, "w", encoding="utf-8") as f:
-            f.write(result.html)
+        save_html_and_upload_s3(result.html, fname, out_dir, s3_folder="bbva_html")
         # Guardar en manifest
         manifest.append(
             {
@@ -102,11 +121,21 @@ def crawl_and_save(
         page_count += 1
         print(f"[OK] {url} -> {fname} ({len(result.html)} chars)")
         time.sleep(delay)
-    # Guardar manifest
+    # Guardar manifest local y en S3/MinIO
     manifest_path = os.path.join(out_dir, "manifest.json")
-    with open(manifest_path, "w", encoding="utf-8") as f:
-        json.dump(manifest, f, ensure_ascii=False, indent=2)
-    print(f"[DONE] {page_count} pages saved. Manifest: {manifest_path}")
+    if settings.app_env.lower() in ("dev", "development"):
+        with open(manifest_path, "w", encoding="utf-8") as f:
+            json.dump(manifest, f, ensure_ascii=False, indent=2)
+    s3 = S3Storage()
+    s3.create_bucket_if_not_exists()
+    s3.write_file(
+        "bbva_html",
+        "manifest.json",
+        json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"),
+    )
+    print(
+        f"[DONE] {page_count} pages saved. Manifest: {manifest_path} (and uploaded to S3/MinIO)"
+    )
 
 
 if __name__ == "__main__":

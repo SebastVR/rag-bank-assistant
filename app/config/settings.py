@@ -4,9 +4,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file="app/.env", extra="ignore")
 
-    # S3 Provider
-    s3_provider: str = "minio"  # minio o aws
-
     # MinIO (local/dev)
     minio_endpoint: str
     minio_access_key: str
@@ -21,7 +18,7 @@ class Settings(BaseSettings):
 
     # General
     app_name: str = "rag-bank-assistant"
-    app_env: str = "development"
+    app_env: str = "dev"  # "dev" para MinIO, "prod" para AWS S3
     app_host: str = "0.0.0.0"
     app_port: int = 8000
 
