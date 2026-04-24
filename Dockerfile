@@ -1,4 +1,4 @@
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -9,10 +9,16 @@ WORKDIR /app
 
 # Instala solo gcc si alguna dependencia lo requiere (como `boto3` si compila algo con C, pero normalmente no es necesario)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
+    build-essential \
     curl \
     ca-certificates \
+    libxml2-dev \
+    libxslt1-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
+
+
+
 # Copia el archivo de requerimientos e instala las dependencias
 COPY ./requirements.txt /app/requirements.txt
 

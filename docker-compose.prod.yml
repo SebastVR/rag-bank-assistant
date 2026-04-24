@@ -13,16 +13,11 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - .env.prod
     environment:
-      - APP_ENV=development
-      - RUN_MIGRATIONS_ON_START=true
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      - APP_ENV=prod
+    depends_on:
+      - minio
     volumes:
       - ./app/debug/pages:/app/debug/pages
       - ./app/debug/json:/app/debug/json
@@ -33,12 +28,12 @@ services:
     image: minio/minio
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000" # S3 API
-      - "9001:9001" # Web UI
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
     env_file:
-      - .env
+      - .env.prod
 
 volumes:
   minio_data:
