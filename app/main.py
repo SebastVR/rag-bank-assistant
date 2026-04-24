@@ -1,12 +1,15 @@
 from fastapi import FastAPI
 
 from app.config.settings import settings
+from app.routers.scraping.scraping_router import router as scraping_router
 
 api = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="RAG Banking Assistant with Web Scraping",
 )
+
+api.include_router(scraping_router)
 
 
 @api.get("/")

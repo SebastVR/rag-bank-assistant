@@ -4,7 +4,7 @@ import json
 import os
 import time
 from typing import Any, Dict, List
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel, Field
@@ -65,10 +65,12 @@ def crawl_and_save(
     base_domain: str,
     out_dir: str = "/app/debug/pages",
     max_pages: int = 20,
+    timeout: int = 20,
+    user_agent: str | None = None,
     delay: float = 1.0,
+    s3_folder: str = "bbva_html",
 ):
-    os.makedirs(out_dir, exist_ok=True)
-    fetcher = HtmlFetcher()
+    fetcher = HtmlFetcher(timeout=timeout, user_agent=user_agent)
     visited = set()
     queue = [start_url]
     manifest = []
@@ -99,8 +101,8 @@ def crawl_and_save(
                 ):
                     internal_links.append(full_url)
         # Guardar HTML local y en S3/MinIO
-        fname = f"bbva_{page_count+1}.html"
-        save_html_and_upload_s3(result.html, fname, out_dir, s3_folder="bbva_html")
+        fname = f"{s3_folder.replace('_html', '')}_{page_count + 1}.html"
+        save_html_and_upload_s3(result.html, fname, out_dir, s3_folder=s3_folder)
         # Guardar en manifest
         manifest.append(
             {
@@ -129,13 +131,22 @@ def crawl_and_save(
     s3 = S3Storage()
     s3.create_bucket_if_not_exists()
     s3.write_file(
-        "bbva_html",
+        s3_folder,
         "manifest.json",
         json.dumps(manifest, ensure_ascii=False, indent=2).encode("utf-8"),
     )
     print(
-        f"[DONE] {page_count} pages saved. Manifest: {manifest_path} (and uploaded to S3/MinIO)"
+        f"[DONE] {page_count} pages saved. Manifest: {manifest_path} "
+        f"(and uploaded to S3/MinIO)"
     )
+    return {
+        "start_url": start_url,
+        "base_domain": base_domain,
+        "max_pages": max_pages,
+        "pages_saved": page_count,
+        "html_prefix": f"{s3_folder}/",
+        "manifest_key": f"{s3_folder}/manifest.json",
+    }
 
 
 if __name__ == "__main__":
@@ -171,5 +182,7 @@ if __name__ == "__main__":
         base_domain=args.base_domain,
         out_dir=args.out_dir,
         max_pages=args.max_pages,
+        timeout=settings.scraper_timeout,
+        user_agent=settings.scraper_user_agent,
         delay=args.delay,
     )

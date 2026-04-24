@@ -61,6 +61,58 @@ class S3Storage:
 
         return full_path
 
+    def read_file(self, folder, object_name):
+        """
+        Lee un archivo del bucket y devuelve su contenido en bytes.
+        """
+        full_path = self._build_path(folder, object_name)
+        try:
+            response = self.s3_client.get_object(
+                Bucket=self.bucket_name,
+                Key=full_path,
+            )
+            return response["Body"].read()
+        except ClientError as e:
+            error_code = e.response.get("Error", {}).get("Code", "")
+            if error_code in ("NoSuchKey", "404"):
+                raise FileNotFoundError(
+                    f"No se encontro el archivo {full_path} en el bucket"
+                )
+            raise Exception(f"Error al leer el archivo del bucket: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Error al leer el archivo del bucket: {str(e)}")
+
+    def list_objects(self, folder, suffix=None):
+        """
+        Lista objetos dentro de una carpeta del bucket.
+        Si suffix se especifica, filtra por esa terminacion.
+        """
+        prefix = folder.strip("/") + "/" if folder else ""
+        keys = []
+        continuation_token = None
+
+        while True:
+            params = {
+                "Bucket": self.bucket_name,
+                "Prefix": prefix,
+            }
+            if continuation_token:
+                params["ContinuationToken"] = continuation_token
+
+            response = self.s3_client.list_objects_v2(**params)
+            contents = response.get("Contents", [])
+            for obj in contents:
+                key = obj["Key"]
+                if suffix and not key.endswith(suffix):
+                    continue
+                keys.append(key)
+
+            if not response.get("IsTruncated"):
+                break
+            continuation_token = response.get("NextContinuationToken")
+
+        return keys
+
     def get_public_url(self, folder, object_name):
         """
         Devuelve una URL pública si el bucket/objeto es público.

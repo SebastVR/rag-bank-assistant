@@ -1,4 +1,3 @@
-import glob
 import hashlib
 import json
 import os
@@ -11,9 +10,9 @@ from app.scraping.parser import HtmlParser
 from app.services.s3_storage import S3Storage
 
 
-def process_all_html_and_return_json() -> Dict[str, Any]:
+def process_all_html_and_return_json(prefix: str) -> Dict[str, Any]:
     """
-    Procesa todos los HTMLs scrapeados, deduplica y devuelve un dict con los documentos únicos.
+    Procesa todos los HTMLs scrapeados bajo el prefijo dado, deduplica y devuelve un dict con los documentos únicos.
     Además, guarda el JSON en MinIO/AWS S3 y en debug/json si es desarrollo.
     """
     # Leer HTMLs desde MinIO/AWS
@@ -22,16 +21,11 @@ def process_all_html_and_return_json() -> Dict[str, Any]:
     cleaner = HtmlCleaner()
     unique_hashes = set()
     unique_docs = {}
-    # Listar todos los objetos HTML en la carpeta bbva_html
-    response = s3.s3_client.list_objects_v2(Bucket=s3.bucket_name, Prefix="bbva_html/")
-    html_keys = [
-        obj["Key"]
-        for obj in response.get("Contents", [])
-        if obj["Key"].endswith(".html")
-    ]
+    # Listar todos los objetos HTML en la carpeta correspondiente
+    html_keys = s3.list_objects(prefix, suffix=".html")
     for key in html_keys:
-        obj = s3.s3_client.get_object(Bucket=s3.bucket_name, Key=key)
-        html = obj["Body"].read().decode("utf-8")
+        object_name = key.replace(f"{prefix}/", "", 1)
+        html = s3.read_file(prefix, object_name).decode("utf-8")
         # Extraer la URL real de la página web (og:url o canonical)
         source_url = None
         og_url_match = re.search(
@@ -78,7 +72,7 @@ def process_all_html_and_return_json() -> Dict[str, Any]:
         output_path = os.path.join(json_dir, "html_docs_unicos.json")
         with open(output_path, "w", encoding="utf-8") as f:
             f.write(json_data)
-    # Guardar en MinIO/AWS S3
-    s3 = S3Storage()
-    s3.write_file("bbva_json", "html_docs_unicos.json", json_data.encode("utf-8"))
+    # Guardar en MinIO/AWS S3 en carpeta dinámica
+    json_prefix = prefix.replace("_html", "_json")
+    s3.write_file(json_prefix, "html_docs_unicos.json", json_data.encode("utf-8"))
     return unique_docs
