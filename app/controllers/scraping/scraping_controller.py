@@ -60,18 +60,20 @@ def _domain_to_prefix(domain: str) -> str:
     return f"{name}_html"
 
 
-def _load_processed_docs() -> Dict[str, Any]:
+def _load_processed_docs(allowed_domain: str) -> Dict[str, Any]:
+    prefix = _domain_to_prefix(allowed_domain).replace("_html", "_json")
     s3 = S3Storage()
-    content = s3.read_file(PROCESSED_FOLDER, PROCESSED_FILE)
+    content = s3.read_file(prefix, PROCESSED_FILE)
     return json.loads(content.decode("utf-8"))
 
 
 def list_processed_documents(
+    allowed_domain: str,
     limit: int = 20,
     offset: int = 0,
     q: Optional[str] = None,
 ) -> Dict[str, Any]:
-    docs = _load_processed_docs()
+    docs = _load_processed_docs(allowed_domain)
     items: List[tuple[str, Dict[str, Any]]] = list(docs.items())
 
     if q:
@@ -110,8 +112,8 @@ def list_processed_documents(
     }
 
 
-def get_processed_document(doc_id: str) -> Dict[str, Any]:
-    docs = _load_processed_docs()
+def get_processed_document(doc_id: str, allowed_domain: str) -> Dict[str, Any]:
+    docs = _load_processed_docs(allowed_domain)
     if doc_id not in docs:
         raise KeyError(f"No existe el documento con id {doc_id}")
     return {"doc_id": doc_id, **docs[doc_id]}
