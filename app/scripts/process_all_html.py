@@ -31,6 +31,7 @@ cleaner = HtmlCleaner()
 unique_hashes = set()
 unique_docs = {}
 
+
 for html_path in html_files:
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -52,6 +53,10 @@ for html_path in html_files:
     parsed_page = parser.parse(html, base_url=base_url)
     cleaned_html = cleaner.clean_html(html)
     clean_text = cleaner.clean_parsed_page(parsed_page, cleaned_html)
+    # FILTRO: descartar si el texto limpio es muy corto o vacío
+    if not clean_text or len(clean_text.strip()) < 100:
+        print(f"Descartado por poco contenido: {html_path}")
+        continue
     # Deduplicar por hash de texto limpio
     doc_hash = hashlib.md5(clean_text.encode("utf-8")).hexdigest()
     if doc_hash not in unique_hashes:
