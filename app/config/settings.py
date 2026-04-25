@@ -69,7 +69,7 @@ class Settings(BaseSettings):
     # LLM runtime (local/API)
     llm_provider: str = "llama_cpp"  # llama_cpp | ollama | openai
     llm_model_name: str = "Qwen3-VL-4B-Instruct-Q4_K_M.gguf"
-    llm_model_path: str = "app/rag/llm/Qwen3-VL-4B-Instruct-Q4_K_M.gguf"
+    llm_model_path: str = "app/rag/Qwen3-VL-4B-Instruct-Q4_K_M.gguf"
     ollama_base_url: str = "http://localhost:11434"
     openai_api_key: str | None = None
 
