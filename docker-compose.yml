@@ -5,18 +5,21 @@ version: "3.9"
 
 services:
   app:
-    networks:
-      - rag_net
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
     env_file:
       - .env
+    ports:
+      - "80:80"
     environment:
-      - APP_ENV=development
+      - APP_ENV=dev
       - RUN_MIGRATIONS_ON_START=true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - rag_net
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
@@ -27,18 +30,40 @@ services:
       - ./app/debug/pages:/app/debug/pages
       - ./app/debug/json:/app/debug/json
 
-  minio:
+  postgres:
+    image: postgres:16
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: rag-bank-assistant
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - rag_net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
     image: minio/minio
     command: server /data --console-address ":9001"
+    env_file:
+      - .env
     ports:
       - "9000:9000" # S3 API
       - "9001:9001" # Web UI
     volumes:
       - minio_data:/data
-    env_file:
-      - .env
+    networks:
+      - rag_net
 
 volumes:
   minio_data:
+  postgres_data:

@@ -4,6 +4,25 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config.settings import settings
+from app.db.base import Base
+from app.db.db_connection import engine
+from app.models import (
+    analytics_event,
+    conversation,
+    document_chunk,
+    document_file,
+    document_section,
+    language_model,
+    llm_usage_log,
+    message,
+    retrieval_log,
+    scraped_document,
+    scraping_run,
+    system_setting,
+)
+from app.routers.admin.populate_router import router as populate_router
+from app.routers.db.connection_router import router as connection_router
+from app.routers.documents.document_router import router as document_router
 from app.routers.scraping.scraping_router import router as scraping_router
 
 api = FastAPI(
@@ -14,6 +33,9 @@ api = FastAPI(
 
 
 api.include_router(scraping_router)
+api.include_router(connection_router)
+api.include_router(populate_router)
+api.include_router(document_router)
 
 
 @api.get("/")
@@ -105,3 +127,26 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content=_error_payload(500, str(exc), request),
     )
+
+
+# Importar todos los modelos para que SQLAlchemy registre las tablas
+from app.models import (
+    analytics_event,
+    conversation,
+    document_chunk,
+    document_file,
+    document_section,
+    language_model,
+    llm_usage_log,
+    message,
+    retrieval_log,
+    scraped_document,
+    scraping_run,
+    system_setting,
+)
+
+try:
+    Base.metadata.create_all(engine)
+    print("✅ Tablas creadas o ya existentes en la base de datos.")
+except Exception as e:
+    print(f"❌ Error al crear las tablas: {e}")

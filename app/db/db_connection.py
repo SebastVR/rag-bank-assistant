@@ -3,12 +3,9 @@ from typing import Any, Generator
 from fastapi import HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from app.config.settings import settings
-
-Base = declarative_base()
-
 
 POSTGRES_URL = (
     f"postgresql://{settings.postgres_user}:{settings.postgres_password}"
@@ -17,7 +14,7 @@ POSTGRES_URL = (
 
 engine = create_engine(
     POSTGRES_URL,
-    echo=settings.debug,
+    echo=False,
     pool_pre_ping=True,
 )
 
