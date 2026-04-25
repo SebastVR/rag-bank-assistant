@@ -1,3 +1,4 @@
+# Límite de chunks por consulta
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,6 +23,12 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = 8000
 
+    # Celery
+    celery_broker_url: str
+    celery_backend_url: str
+    rabbitmq_default_user: str
+    rabbitmq_default_pass: str
+
     # Scraping
     scraper_base_url: str
     scraper_allowed_domain: str
@@ -44,6 +51,14 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_service_key: str | None = None
     supabase_attachment_bucket: str | None = None
+
+    # Qdrant (vector store)
+    qdrant_host: str  # Host del contenedor Qdrant
+    qdrant_port: int  # Puerto HTTP
+    qdrant_grpc_port: int  # Puerto gRPC
+    qdrant_collection_name: str
+    qdrant_max_chunks_retrieved: int  # Límite de chunks por consulta
+    qdrant_max_chunks_reranked: int  # Límite de chunks por reordenamiento
 
 
 settings = Settings()

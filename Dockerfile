@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED 1
 # Establece el directorio de trabajo
 WORKDIR /app
 
-# Instala solo gcc si alguna dependencia lo requiere (como `boto3` si compila algo con C, pero normalmente no es necesario)
+
+# --- Dependencias de sistema para procesamiento de PDF, OCR y utilidades RAG ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
@@ -16,7 +17,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxslt1-dev \
     zlib1g-dev \
     postgresql-client \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-spa \
+    libleptonica-dev \
+    libglib2.0-0 \
+    poppler-utils \
+    libpoppler-glib-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 
 

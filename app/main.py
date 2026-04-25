@@ -21,6 +21,7 @@ from app.models import (
     system_setting,
 )
 from app.routers.admin.populate_router import router as populate_router
+from app.routers.admin.scraping_run_router import router as scraping_run_router
 from app.routers.db.connection_router import router as connection_router
 from app.routers.documents.document_router import router as document_router
 from app.routers.scraping.scraping_router import router as scraping_router
@@ -36,6 +37,7 @@ api.include_router(scraping_router)
 api.include_router(connection_router)
 api.include_router(populate_router)
 api.include_router(document_router)
+api.include_router(scraping_run_router)
 
 
 @api.get("/")
