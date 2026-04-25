@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # General
     app_name: str = "rag-bank-assistant"
-    app_env: str = "dev"  # "dev" para MinIO, "prod" para AWS S3
+    app_env: str = "dev"  # "dev" para local/dev, "prod" para producción
     app_host: str = "0.0.0.0"
     app_port: int = 8000
 
@@ -32,6 +32,18 @@ class Settings(BaseSettings):
     # Storage
     raw_data_path: str = "data/raw"
     processed_data_path: str = "data/processed"
+
+    # Postgres (para desarrollo y producción)
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+    postgres_host: str
+    postgres_port: int = 5432
+
+    # Supabase (para producción cloud opcional)
+    supabase_url: str | None = None
+    supabase_service_key: str | None = None
+    supabase_attachment_bucket: str | None = None
 
 
 settings = Settings()
