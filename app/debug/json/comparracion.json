@@ -1,0 +1,295 @@
+{
+    "total": 17,
+    "limit": 20,
+    "offset": 0,
+    "items": [
+        {
+            "id": 17,
+            "doc_id": "bbva_9",
+            "title": "Créditos de Vivienda | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos/vivienda.html",
+            "status": "processed",
+            "headings": [
+                "Crédito de vivienda",
+                "Aquí está el crédito que necesitas ¡escógelo!",
+                "Conoce los proyectos financiados",
+                "Si hablamos de vivienda, ¿con qué momento te identificas?",
+                "Quiero dejar de pagar la casa de otro para comprar la mía"
+            ],
+            "text_preview": "Créditos de Vivienda | BBVA Colombia Crédito de vivienda Aquí está el crédito que necesitas ¡escógelo! Conoce los proyectos financiados Si hablamos de vivienda, ¿con qué momento te identificas? Quiero dejar de pagar la casa de otro para comprar la mía He visto muchas casas, pero necesito un experto que me ayude a decidir Ya compré mi casa, pero quiero hacer más por ella Quiero otra vivienda, pero ",
+            "text_length": 17110,
+            "created_at": "2026-04-25T10:26:38.055270+00:00"
+        },
+        {
+            "id": 16,
+            "doc_id": "bbva_8",
+            "title": "Créditos de Vehículo | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos/vehiculo.html",
+            "status": "processed",
+            "headings": [
+                "Créditos de Vehículo",
+                "¿Estrenamos moto?",
+                "Más beneficios del Crédito de Vehículo BBVA",
+                "Financiamos hasta el 100%.",
+                "Prestamos hasta el 90%."
+            ],
+            "text_preview": "Créditos de Vehículo | BBVA Colombia Créditos de Vehículo ¿Estrenamos moto? Más beneficios del Crédito de Vehículo BBVA Financiamos hasta el 100%. Prestamos hasta el 90%. Plazos de hasta 84 meses. Compramos la cartera de tu vehículo. Escoge el crédito de vehículo ideal para ti Preguntas frecuentes ¿Cómo y dónde puedo pagar la cuota mensual de mi préstamo? ¿Dónde y cómo puedo consultar el estado de",
+            "text_length": 16978,
+            "created_at": "2026-04-25T10:26:38.053719+00:00"
+        },
+        {
+            "id": 15,
+            "doc_id": "bbva_7",
+            "title": "Préstamos Personales | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos.html",
+            "status": "processed",
+            "headings": [
+                "Préstamos",
+                "Productos destacados",
+                "Preguntas frecuentes",
+                "¿Cómo puedo solicitar un préstamo?",
+                "¿Dónde y cómo puedo consultar el estado de mi préstamo?"
+            ],
+            "text_preview": "Préstamos Personales | BBVA Colombia Préstamos Productos destacados Preguntas frecuentes ¿Cómo puedo solicitar un préstamo? ¿Dónde y cómo puedo consultar el estado de mi préstamo? ¿Cómo y dónde puedo pagar la cuota mensual de mi préstamo? ¿Cuáles son los canales para atención y reclamos? ¿Qué es un sistema de amortización? También te puede interesar Información de interés Información Corporativa O",
+            "text_length": 39145,
+            "created_at": "2026-04-25T10:26:38.051117+00:00"
+        },
+        {
+            "id": 14,
+            "doc_id": "bbva_4",
+            "title": "BBVA Empresas | Empresas | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/empresas.html",
+            "status": "processed",
+            "headings": [
+                "Cobro al Toque",
+                "Pymes",
+                "Datáfono móvil",
+                "Crece sin límites, crece con un aliado en BBVA",
+                "Con mucho más de lo que imaginas"
+            ],
+            "text_preview": "BBVA Empresas | Empresas | BBVA Colombia Cobro al Toque Pymes Datáfono móvil Crece sin límites, crece con un aliado en BBVA Con mucho más de lo que imaginas Con todo lo que te importa Manteniéndote siempre al tanto BBVA es empresas Y que manejas en cualquier lugar Información de interés Información Corporativa Otras webs de BBVA Adelanto de Venta Crédito Virtual CDT Envíos al exterior Potenciando ",
+            "text_length": 12387,
+            "created_at": "2026-04-25T10:26:38.048851+00:00"
+        },
+        {
+            "id": 13,
+            "doc_id": "bbva_20",
+            "title": "Cuenta de Ahorro Fijo: Tasas, Plazos y Cómo Abrirla | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/cuentas/ahorro/fijo.html",
+            "status": "processed",
+            "headings": [
+                "Cuenta de ahorro fijo",
+                "Haz crecer tu dinero y gana $120 millones ahorrando con BBVA",
+                "Cuenta de Ahorro Fijo BBVA",
+                "Preguntas Frecuentes",
+                "¿Que necesito para abrir mi ahorro fijo digital?"
+            ],
+            "text_preview": "Cuenta de Ahorro Fijo: Tasas, Plazos y Cómo Abrirla | BBVA Colombia Cuenta de ahorro fijo Haz crecer tu dinero y gana $120 millones ahorrando con BBVA Cuenta de Ahorro Fijo BBVA Preguntas Frecuentes ¿Que necesito para abrir mi ahorro fijo digital? El cliente puede cancelar o retirar el dinero del ahorro fijo digital? ¿Qué pasa si no se retirar el ahorro fijo digital en su fecha de vencimiento? ¿Qu",
+            "text_length": 16886,
+            "created_at": "2026-04-25T10:26:38.046751+00:00"
+        },
+        {
+            "id": 12,
+            "doc_id": "bbva_2",
+            "title": "Aviso Legal | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/aviso-legal.html",
+            "status": "processed",
+            "headings": [
+                "Aviso Legal",
+                "Información de interés",
+                "Información Corporativa",
+                "Otras webs de BBVA"
+            ],
+            "text_preview": "Aviso Legal | BBVA Colombia Aviso Legal Información de interés Información Corporativa Otras webs de BBVA Utilizamos cookies propias y de terceros para mejorar nuestros servicios y mostrar a los usuarios publicidad relacionada con sus preferencias. Si se continúa navegando, consideramos que se acepta su uso. Es posible cambiar la configuración u obtener más información. Gestiona tus tarjetas, cuen",
+            "text_length": 10507,
+            "created_at": "2026-04-25T10:26:38.044368+00:00"
+        },
+        {
+            "id": 11,
+            "doc_id": "bbva_19",
+            "title": "Cuenta pensional | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/cuentas/ahorro/pensionados.html",
+            "status": "processed",
+            "headings": [
+                "Cuenta Pensión",
+                "Recibe tu pago de pensión y maneja tu mesada 100% digital",
+                "¿Qué necesito para abrir la cuenta pensión BBVA?",
+                "¿Cómo puedo activar mi Tarjeta Débito BBVA?",
+                "Conoce por qué tu Tarjeta Débito BBVA te da más."
+            ],
+            "text_preview": "Cuenta pensional | BBVA Colombia Cuenta Pensión Recibe tu pago de pensión y maneja tu mesada 100% digital ¿Qué necesito para abrir la cuenta pensión BBVA? ¿Cómo puedo activar mi Tarjeta Débito BBVA? Conoce por qué tu Tarjeta Débito BBVA te da más. Cada vez más personas viajan con su Cuenta de Pensional BBVA. ¡Aprovecha y hazlo tú también! Conoce las 3 claves para aprovechar tu App BBVA y manejar t",
+            "text_length": 33342,
+            "created_at": "2026-04-25T10:26:38.041227+00:00"
+        },
+        {
+            "id": 10,
+            "doc_id": "bbva_18",
+            "title": "Cuenta Digital | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/cuentas/ahorro/digital.html",
+            "status": "processed",
+            "headings": [
+                "Cuenta Digital",
+                "Maneja tu dinero 100% digital",
+                "Conoce por qué tu Tarjeta Débito Digital BBVA te da más",
+                "Documentos y enlaces de interés",
+                "Información de interés"
+            ],
+            "text_preview": "Cuenta Digital | BBVA Colombia Cuenta Digital Maneja tu dinero 100% digital Conoce por qué tu Tarjeta Débito Digital BBVA te da más Documentos y enlaces de interés Información de interés Información Corporativa Otras webs de BBVA Colombia Vive Si no tienes tu Cuenta Digital BBVA ábrela así de fácil Activa tu token digital para mayor seguridad Compra más seguro en internet Úsala donde quieras Prend",
+            "text_length": 14946,
+            "created_at": "2026-04-25T10:26:38.038191+00:00"
+        },
+        {
+            "id": 9,
+            "doc_id": "bbva_17",
+            "title": "Cuenta de Nómina | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/cuentas/ahorro/nomina.html",
+            "status": "processed",
+            "headings": [
+                "Cuenta de Nómina",
+                "¿Por qué elegir la Cuenta Nómina BBVA?",
+                "Para disfrutar de tu sueldo usando la Tarjeta Débito BBVA",
+                "Abrir tu Cuenta Nómina es muy fácil, rápido y seguro",
+                "¿Avanzamos?"
+            ],
+            "text_preview": "Cuenta de Nómina | BBVA Colombia Cuenta de Nómina ¿Por qué elegir la Cuenta Nómina BBVA? Para disfrutar de tu sueldo usando la Tarjeta Débito BBVA Abrir tu Cuenta Nómina es muy fácil, rápido y seguro ¿Avanzamos? Documentos y enlaces de interés FAQS Información de interés Información Corporativa Otras webs de BBVA Usa tu cuenta sin costo de manejo Compra seguro con tu Tarjeta Débito Recibe 3 Puntos",
+            "text_length": 28848,
+            "created_at": "2026-04-25T10:26:38.034593+00:00"
+        },
+        {
+            "id": 8,
+            "doc_id": "bbva_16",
+            "title": "Cuenta de Ahorros - Rentabilidad y Beneficios para ti | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/cuentas/ahorro.html",
+            "status": "processed",
+            "headings": [
+                "Cuenta de Ahorros",
+                "Lo que buscas cuesta menos",
+                "Olvídate de las cuotas",
+                "Tú eres tu propio respaldo",
+                "Información de interés"
+            ],
+            "text_preview": "Cuenta de Ahorros - Rentabilidad y Beneficios para ti | BBVA Colombia Cuenta de Ahorros Lo que buscas cuesta menos Olvídate de las cuotas Tú eres tu propio respaldo Información de interés Información Corporativa Otras webs de BBVA Para recibir tu salario Para utilizarla como quieras Para recibir tu pensión Colombia Vive Cuenta Ahorro Fijo Cuenta de Ahorro AFC Cuenta Ahorradiario Cuenta de Ahorro B",
+            "text_length": 18881,
+            "created_at": "2026-04-25T10:26:38.030181+00:00"
+        },
+        {
+            "id": 7,
+            "doc_id": "bbva_15",
+            "title": "Cuentas Bancarias | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/cuentas.html",
+            "status": "processed",
+            "headings": [
+                "Cuentas bancarias",
+                "Cuentas BBVA",
+                "Información de interés",
+                "Información Corporativa",
+                "Otras webs de BBVA"
+            ],
+            "text_preview": "Cuentas Bancarias | BBVA Colombia Cuentas bancarias Cuentas BBVA Información de interés Información Corporativa Otras webs de BBVA Colombia Vive Cuenta de Nómina Cuenta Digital Cuenta Pensional Cuenta de Ahorro Blue Cuenta de Ahorro Mi Proyecto Dinero móvil Cuenta de Ahorro Blue Kids Cuenta Ahorradiario Cuenta Ahorro Fijo Cuenta de Ahorro AFC Cuenta de Ahorro Hogar Cuenta Corriente Tradicional Cue",
+            "text_length": 26837,
+            "created_at": "2026-04-25T10:26:38.026755+00:00"
+        },
+        {
+            "id": 6,
+            "doc_id": "bbva_14",
+            "title": "Adelanto de Nómina | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/servicios-digitales/adelanto-de-nomina.html",
+            "status": "processed",
+            "headings": [
+                "Hay oportunidades que no dan espera.",
+                "¿Qué es un adelanto de nómina?",
+                "¿Cómo funciona?",
+                "Acceso digital",
+                "Facilidad y seguridad"
+            ],
+            "text_preview": "Adelanto de Nómina | BBVA Colombia Hay oportunidades que no dan espera. ¿Qué es un adelanto de nómina? ¿Cómo funciona? Acceso digital Facilidad y seguridad Flexibilidad de pago Requisitos para adelantar tu nómina También podría interesarte Información de interés Información Corporativa Otras webs de BBVA ¿Por qué solicitar tu adelanto? Utilizamos cookies propias y de terceros para mejorar nuestros",
+            "text_length": 11229,
+            "created_at": "2026-04-25T10:26:38.025213+00:00"
+        },
+        {
+            "id": 5,
+            "doc_id": "bbva_13",
+            "title": "Crédito de Libranza - Para empleados y pensionados | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos/consumo/libranza.html",
+            "status": "processed",
+            "headings": [
+                "Crédito de libranza",
+                "¿Por qué solicitar un Crédito de Libranza?",
+                "Descuento automático de tu cuota fija a través de tu cuenta de nómina o pensión.",
+                "Tasa de interés de acuerdo al convenio de tu empresa con BBVA.",
+                "No requieres codeudor para realizar la solicitud"
+            ],
+            "text_preview": "Crédito de Libranza - Para empleados y pensionados | BBVA Colombia Crédito de libranza ¿Por qué solicitar un Crédito de Libranza? Descuento automático de tu cuota fija a través de tu cuenta de nómina o pensión. Tasa de interés de acuerdo al convenio de tu empresa con BBVA. No requieres codeudor para realizar la solicitud Tarjeta de Crédito Aqua BBVA, ideal para ti. Preguntas frecuentes ¿Cómo puedo",
+            "text_length": 13622,
+            "created_at": "2026-04-25T10:26:38.023665+00:00"
+        },
+        {
+            "id": 4,
+            "doc_id": "bbva_12",
+            "title": "Créditos de Consumo | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos/consumo.html",
+            "status": "processed",
+            "headings": [
+                "Créditos de consumo",
+                "¿Qué es un crédito de consumo?",
+                "Todos los créditos de consumo",
+                "Preguntas frecuentes",
+                "¿Cómo puedo solicitar un préstamo?"
+            ],
+            "text_preview": "Créditos de Consumo | BBVA Colombia Créditos de consumo ¿Qué es un crédito de consumo? Todos los créditos de consumo Preguntas frecuentes ¿Cómo puedo solicitar un préstamo? ¿Cómo y dónde puedo pagar la cuota mensual de mi préstamo? ¿Dónde y cómo puedo consultar el estado de mi préstamo? Te puede interesar Información de interés Información Corporativa Otras webs de BBVA Cupo Rotativo Crédito de Li",
+            "text_length": 14707,
+            "created_at": "2026-04-25T10:26:38.022116+00:00"
+        },
+        {
+            "id": 3,
+            "doc_id": "bbva_11",
+            "title": "Préstamos en línea | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos/online.html",
+            "status": "processed",
+            "headings": [
+                "Crédito digital BBVA",
+                "Tu crédito, sin complicaciones",
+                "Así de fácil es tener tu crédito de vehículo",
+                "¿Qué es un préstamo en línea?",
+                "También te puede interesar"
+            ],
+            "text_preview": "Préstamos en línea | BBVA Colombia Crédito digital BBVA Tu crédito, sin complicaciones Así de fácil es tener tu crédito de vehículo ¿Qué es un préstamo en línea? También te puede interesar Preguntas frecuentes ¿Cómo puedo pagar la cuota mensual de mi préstamo? ¿Dónde y cómo puedo consultar el estado de mi préstamo? ¿Cómo puedo obtener el paz y salvo de un préstamo ya cancelado? ¿Cuáles son los can",
+            "text_length": 20576,
+            "created_at": "2026-04-25T10:26:38.020209+00:00"
+        },
+        {
+            "id": 2,
+            "doc_id": "bbva_10",
+            "title": "Crédito de Vivienda para Colombianos en el Exterior | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co/personas/productos/prestamos/vivienda/colombianos-en-el-exterior.html",
+            "status": "processed",
+            "headings": [
+                "Crédito para Colombianos en el exterior",
+                "Obtén tu crédito en Colombia, sin tener que ir.",
+                "Información de interés",
+                "Información Corporativa",
+                "Otras webs de BBVA"
+            ],
+            "text_preview": "Crédito de Vivienda para Colombianos en el Exterior | BBVA Colombia Crédito para Colombianos en el exterior Obtén tu crédito en Colombia, sin tener que ir. Información de interés Información Corporativa Otras webs de BBVA Nos adaptamos a tus metas Asesoría personalizada durante todo el proceso Opciones a tu medida Cobertura en 27 países Condiciones pensadas para ti En América En Europa - Oceanía E",
+            "text_length": 19005,
+            "created_at": "2026-04-25T10:26:38.018157+00:00"
+        },
+        {
+            "id": 1,
+            "doc_id": "bbva_1",
+            "title": "BBVA Colombia: Bienvenido a la Banca Virtual | BBVA Colombia",
+            "source_url": "https://www.bbva.com.co",
+            "status": "processed",
+            "headings": [
+                "Gana $120 millones ahorrando con BBVA",
+                "Cumplimos 30 años en Colombia",
+                "Nace nuestro portafolio Colombia Vive",
+                "Tarjetas de Crédito BBVA",
+                "Con mucho más de lo que imaginas"
+            ],
+            "text_preview": "BBVA Colombia: Bienvenido a la Banca Virtual | BBVA Colombia Gana $120 millones ahorrando con BBVA Cumplimos 30 años en Colombia Nace nuestro portafolio Colombia Vive Tarjetas de Crédito BBVA Con mucho más de lo que imaginas Un préstamo para facilitar las cuotas Lo que buscas cuesta menos Olvídate de las cuotas Tú eres tu propio respaldo Poder pagarlo todo fácil desde tu celular Con todo lo que te",
+            "text_length": 11466,
+            "created_at": "2026-04-25T10:26:38.015623+00:00"
+        }
+    ]
+}
