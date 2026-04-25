@@ -60,5 +60,18 @@ class Settings(BaseSettings):
     qdrant_max_chunks_retrieved: int  # Límite de chunks por consulta
     qdrant_max_chunks_reranked: int  # Límite de chunks por reordenamiento
 
+    # RAG (chunking/embeddings/reranker)
+    rag_chunk_size: int = 900
+    rag_chunk_overlap: int = 150
+    rag_embedding_model: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    rag_reranker_model: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+    # LLM runtime (local/API)
+    llm_provider: str = "llama_cpp"  # llama_cpp | ollama | openai
+    llm_model_name: str = "Qwen3-VL-4B-Instruct-Q4_K_M.gguf"
+    llm_model_path: str = "app/rag/llm/Qwen3-VL-4B-Instruct-Q4_K_M.gguf"
+    ollama_base_url: str = "http://localhost:11434"
+    openai_api_key: str | None = None
+
 
 settings = Settings()

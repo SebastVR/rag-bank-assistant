@@ -42,7 +42,9 @@ sentence-transformers==4.1.0        # Embeddings open source (dev)
 transformers==4.51.3                # Modelos HuggingFace (dev)
 torch==2.7.0                        # Backend para embeddings (dev)
 qdrant-client==1.14.2               # Cliente para base vectorial Qdrant
-# openai==1.76.2                    # (opcional, solo si usas OpenAI API)
+huggingface-hub==0.31.2             # Descarga/gestión de modelos HF
+llama-cpp-python==0.3.9             # Inferencia local GGUF (Qwen/Llama)
+openai==1.76.2              # (opcional, solo si usas OpenAI API)
 
 # =============
 # Procesamiento de PDFs y OCR

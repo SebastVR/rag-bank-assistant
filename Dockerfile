@@ -11,6 +11,8 @@ WORKDIR /app
 # --- Dependencias de sistema para procesamiento de PDF, OCR y utilidades RAG ---
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    git \
+    cmake \
     curl \
     ca-certificates \
     libxml2-dev \
