@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
 
@@ -13,9 +15,15 @@ router = APIRouter(prefix="/api/v1/scraping", tags=["scraping"])
 
 class CrawlRequest(BaseModel):
     base_url: str | None = Field(default=None)
-    allowed_domain: str | None = Field(default=None)
     max_pages: int | None = Field(default=None, ge=1, le=500)
     timeout: int | None = Field(default=None, ge=5, le=120)
+
+
+def extract_domain(url: str) -> str:
+    netloc = urlparse(url).netloc
+    if netloc.startswith("www."):
+        netloc = netloc[4:]
+    return netloc
 
 
 @router.post("/crawl")
@@ -24,9 +32,12 @@ def crawl_site(payload: CrawlRequest):
     Inicia el crawling para el dominio especificado y guarda los HTMLs bajo el prefijo correspondiente en S3.
     """
     try:
+        if not payload.base_url:
+            raise ValueError("base_url es requerido")
+        allowed_domain = extract_domain(payload.base_url)
         return run_crawl(
             base_url=payload.base_url,
-            allowed_domain=payload.allowed_domain,
+            allowed_domain=allowed_domain,
             max_pages=payload.max_pages,
             timeout=payload.timeout,
         )

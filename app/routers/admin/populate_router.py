@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Query
 
-from app.services.db_populate_service import populate_scraped_documents_from_prefix
+from app.services.admin.db_populate_service import (
+    populate_scraped_documents_from_prefix,
+)
 
-router = APIRouter(prefix="/api/v1/admin", tags=["admin"])
+router = APIRouter(prefix="/api/v1/admin", tags=["etl"])
 
 
 @router.post("/populate-db")

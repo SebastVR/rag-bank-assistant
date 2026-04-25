@@ -4,7 +4,7 @@ from app.celery_worker.celery_config import celery_app
 from app.db.db_connection import SessionLocal
 from app.models.document_file import DocumentFile
 from app.models.scraped_document import ScrapedDocument
-from app.services.rag_pipeline_service import get_rag_ingestion_service
+from app.services.rag.rag_pipeline_service import get_rag_ingestion_service
 
 logger = get_task_logger(__name__)
 

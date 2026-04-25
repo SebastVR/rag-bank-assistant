@@ -8,7 +8,9 @@ from app.db.db_connection import SessionLocal
 from app.models.document_file import DocumentFile
 from app.models.scraped_document import ScrapedDocument
 from app.models.scraping_run import ScrapingRun
-from app.services.html_processing_service import process_all_html_and_return_json
+from app.services.scraping.html_processing_service import (
+    process_all_html_and_return_json,
+)
 
 PDF_URL_RE = re.compile(r"https?://[^\s\"'<>]+?\.pdf(?:\?[^\s\"'<>]*)?", re.IGNORECASE)
 

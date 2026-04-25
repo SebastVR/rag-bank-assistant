@@ -2,14 +2,14 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.controllers.documents.document_controller import (
+from app.controllers.db.documents_controller import (
     get_scraped_document_detail,
     list_document_files,
     list_scraped_documents,
 )
 from app.db.db_connection import get_db
 
-router = APIRouter(prefix="/api/v1/documents", tags=["documents"])
+router = APIRouter(prefix="/api/v1/db/documents", tags=["db:documents"])
 
 
 @router.get("/scraped")

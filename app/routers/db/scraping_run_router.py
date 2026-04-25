@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.controllers.documents.document_controller import _to_iso
+from app.controllers.db.documents_controller import _to_iso
 from app.db.db_connection import get_db
 from app.models.scraping_run import ScrapingRun
 
-router = APIRouter(prefix="/api/v1/scraping_runs", tags=["scraping_runs"])
+router = APIRouter(prefix="/api/v1/db/scraping/runs", tags=["db:scraping"])
 
 
 @router.get("/", summary="Listar ejecuciones de scraping", response_model=None)

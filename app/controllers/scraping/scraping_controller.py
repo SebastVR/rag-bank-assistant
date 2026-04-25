@@ -4,8 +4,10 @@ from urllib.parse import urlparse
 
 from app.config.settings import settings
 from app.scraping.crawler import crawl_and_save
-from app.services.html_processing_service import process_all_html_and_return_json
 from app.services.s3_storage import S3Storage
+from app.services.scraping.html_processing_service import (
+    process_all_html_and_return_json,
+)
 
 PROCESSED_FOLDER = "bbva_json"
 PROCESSED_FILE = "html_docs_unicos.json"

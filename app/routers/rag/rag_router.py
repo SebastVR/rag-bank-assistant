@@ -8,7 +8,7 @@ from app.celery_worker.tasks import (
 )
 from app.db.db_connection import SessionLocal
 from app.models.document_file import DocumentFile
-from app.services.rag_query_service import RagQueryService
+from app.services.rag.rag_query_service import RagQueryService
 
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
 

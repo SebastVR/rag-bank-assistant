@@ -6,5 +6,5 @@ RAG_SYSTEM_PROMPT = (
 RAG_USER_PROMPT_TEMPLATE = (
     "Pregunta:\n{question}\n\n"
     "Contexto:\n{context}\n\n"
-    "Responde en espanol claro. Si falta evidencia, dilo explicitamente."
+    "Responde en español claro. Si falta evidencia, dilo explicitamente."
 )

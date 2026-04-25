@@ -21,16 +21,24 @@ from app.models import (
     system_setting,
 )
 from app.routers.admin.populate_router import router as populate_router
-from app.routers.admin.rag_router import router as rag_router
-from app.routers.admin.scraping_run_router import router as scraping_run_router
 from app.routers.db.connection_router import router as connection_router
-from app.routers.documents.document_router import router as document_router
+from app.routers.db.document_router import router as document_router
+from app.routers.db.scraping_run_router import router as scraping_run_router
+from app.routers.rag.rag_router import router as rag_router
 from app.routers.scraping.scraping_router import router as scraping_router
 
 api = FastAPI(
     title=settings.app_name,
     version="0.1.0",
     description="RAG Banking Assistant with Web Scraping",
+    openapi_tags=[
+        {"name": "scraping", "description": "Crawler y procesamiento web"},
+        {"name": "etl", "description": "Procesos de carga y poblamiento"},
+        {"name": "rag", "description": "Ingestion, consulta y estado de RAG"},
+        {"name": "db", "description": "Utilidades de base de datos"},
+        {"name": "db:scraping", "description": "Lecturas de modelos de scraping"},
+        {"name": "db:documents", "description": "Lecturas de modelos de documentos"},
+    ],
 )
 
 

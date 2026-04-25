@@ -85,7 +85,8 @@ services:
       PYTHONPATH: /app/app
     command: >
       sh -lc 'celery -A app.celery_worker.celery_config:celery_app worker
-      --loglevel=info --hostname=rag-bank-assistant-worker -Q rag-bank-assistant'
+      --loglevel=info --hostname=rag-bank-assistant-worker -Q
+      rag-bank-assistant'
     volumes:
       - ./app:/app/app
     networks:
