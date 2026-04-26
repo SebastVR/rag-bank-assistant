@@ -278,6 +278,16 @@ def rag_chat(request: RagChatRequest):
         db.rollback()
         latency_ms = int((time.perf_counter() - started) * 1000)
         if conversation is not None:
+            # Solo loguea el message_id si el mensaje existe y fue insertado exitosamente
+            safe_message_id = (
+                user_message.id
+                if (
+                    user_message
+                    and user_message.id
+                    and db.get(Message, user_message.id)
+                )
+                else None
+            )
             create_llm_usage_log(
                 db=db,
                 provider=active_provider,
@@ -285,7 +295,7 @@ def rag_chat(request: RagChatRequest):
                 prompt_text=request.question,
                 response_text="",
                 status="failed",
-                message_id=(user_message.id if user_message else None),
+                message_id=safe_message_id,
                 conversation_id=conversation.id,
                 latency_ms=latency_ms,
                 error_message=str(exc),

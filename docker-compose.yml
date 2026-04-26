@@ -35,6 +35,7 @@ services:
     volumes:
       - ./app/debug/pages:/app/debug/pages
       - ./app/debug/json:/app/debug/json
+      - ./hf_cache:/root/.cache/huggingface
 
   # --- Servicio Qdrant (vector store) ---
   qdrant:
@@ -89,6 +90,7 @@ services:
       rag-bank-assistant'
     volumes:
       - ./app:/app/app
+      - ./hf_cache:/root/.cache/huggingface
     networks:
       - rag_net
     depends_on:
@@ -171,3 +173,4 @@ volumes:
   postgres_data:
   qdrant_data:
   redis_data:
+  hf_cache:
