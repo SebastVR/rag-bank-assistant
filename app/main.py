@@ -1,31 +1,21 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+import app.models  # noqa: F401
 from app.config.settings import settings
 from app.db.base import Base
-from app.db.db_connection import engine
-from app.models import (
-    analytics_event,
-    conversation,
-    document_chunk,
-    document_file,
-    document_section,
-    language_model,
-    llm_usage_log,
-    message,
-    retrieval_log,
-    scraped_document,
-    scraping_run,
-    system_setting,
-)
+from app.db.db_connection import SessionLocal, engine
 from app.routers.admin.populate_router import router as populate_router
 from app.routers.db.connection_router import router as connection_router
 from app.routers.db.document_router import router as document_router
+from app.routers.db.model_router import router as model_router
 from app.routers.db.scraping_run_router import router as scraping_run_router
+from app.routers.llm.llm_router import router as llm_router
 from app.routers.rag.rag_router import router as rag_router
 from app.routers.scraping.scraping_router import router as scraping_router
+from app.services.llm.language_model_registry import ensure_default_language_models
 
 api = FastAPI(
     title=settings.app_name,
@@ -38,6 +28,8 @@ api = FastAPI(
         {"name": "db", "description": "Utilidades de base de datos"},
         {"name": "db:scraping", "description": "Lecturas de modelos de scraping"},
         {"name": "db:documents", "description": "Lecturas de modelos de documentos"},
+        {"name": "db:models", "description": "Lecturas de modelos internos"},
+        {"name": "llm", "description": "Gestion de modelos LLM y runtime"},
     ],
 )
 
@@ -48,6 +40,8 @@ api.include_router(populate_router)
 api.include_router(rag_router)
 api.include_router(document_router)
 api.include_router(scraping_run_router)
+api.include_router(model_router)
+api.include_router(llm_router)
 
 
 @api.get("/")
@@ -141,24 +135,18 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
     )
 
 
-# Importar todos los modelos para que SQLAlchemy registre las tablas
-from app.models import (
-    analytics_event,
-    conversation,
-    document_chunk,
-    document_file,
-    document_section,
-    language_model,
-    llm_usage_log,
-    message,
-    retrieval_log,
-    scraped_document,
-    scraping_run,
-    system_setting,
-)
-
 try:
     Base.metadata.create_all(engine)
+    db = SessionLocal()
+    try:
+        seed_result = ensure_default_language_models(db)
+    finally:
+        db.close()
     print("✅ Tablas creadas o ya existentes en la base de datos.")
+    print(
+        "✅ LanguageModel seed aplicado: "
+        f"created={seed_result['created']} "
+        f"updated={seed_result['updated']}"
+    )
 except Exception as e:
     print(f"❌ Error al crear las tablas: {e}")

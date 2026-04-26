@@ -72,8 +72,11 @@ tenacity==8.2.0                     # Reintentos automáticos
 # Data Science
 # =============
 # pandas==2.2.3
-# numpy==2.2.5
-
+httpx==0.28.1
+numpy==2.2.5
+streamlit==1.44.1
+pandas==2.2.3
+plotly==5.24.1
 
 # =============
 # Utils
@@ -87,3 +90,8 @@ orjson==3.10.18                     # JSON rápido (opcional)
 # =============
 # pytest==8.3.5
 # pytest-asyncio==0.26.0
+
+# =============
+# FastAPI Uploads
+# =============
+python-multipart==0.0.20

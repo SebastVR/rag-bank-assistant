@@ -1,13 +1,23 @@
-from fastapi import APIRouter
+import time
+from datetime import datetime, timezone
+from uuid import uuid4
+
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy import func
 
 from app.celery_worker.tasks import (
     process_pdf_file_task,
     process_pending_ingestion_task,
     vectorize_html_document_task,
 )
+from app.config.settings import settings
 from app.db.db_connection import SessionLocal
+from app.models.conversation import Conversation
 from app.models.document_file import DocumentFile
+from app.models.message import Message
+from app.services.llm.runtime_config_service import get_runtime_llm_config
+from app.services.llm.usage_logging_service import create_llm_usage_log
 from app.services.rag.rag_query_service import RagQueryService
 
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
@@ -16,6 +26,88 @@ router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
 class RagQuestionRequest(BaseModel):
     question: str = Field(..., min_length=3)
     use_rerank: bool = True
+
+
+class RagChatRequest(BaseModel):
+    question: str = Field(..., min_length=3)
+    conversation_id: int | None = Field(
+        default=None,
+        description="ID numerico de la conversacion existente",
+    )
+    session_id: str | None = Field(
+        default=None,
+        min_length=3,
+        description="ID de sesion externo; si no existe, se crea conversacion",
+    )
+    history_messages: int = Field(
+        default=6,
+        ge=0,
+        le=50,
+        description="Cantidad de mensajes previos usados como contexto",
+    )
+    use_rerank: bool = True
+
+
+def _resolve_or_create_conversation(db, payload: RagChatRequest) -> Conversation:
+    if payload.conversation_id is not None:
+        row = db.get(Conversation, payload.conversation_id)
+        if row is None:
+            raise ValueError(f"conversation_id={payload.conversation_id} no existe")
+        return row
+
+    if payload.session_id:
+        row = (
+            db.query(Conversation)
+            .filter(Conversation.session_id == payload.session_id)
+            .first()
+        )
+        if row is not None:
+            return row
+
+    session_id = payload.session_id or str(uuid4())
+    now = datetime.now(timezone.utc)
+    row = Conversation(
+        session_id=session_id,
+        title=(payload.question[:80] if payload.question else "Chat"),
+        channel="api",
+        created_at=now,
+        updated_at=now,
+    )
+    db.add(row)
+    db.flush()
+    return row
+
+
+def _next_message_order(db, conversation_id: int) -> int:
+    max_order = (
+        db.query(func.max(Message.message_order))
+        .filter(Message.conversation_id == conversation_id)
+        .scalar()
+    )
+    return int(max_order or 0)
+
+
+def _history_as_text(db, conversation_id: int, history_messages: int) -> str:
+    if history_messages <= 0:
+        return ""
+
+    rows = (
+        db.query(Message)
+        .filter(Message.conversation_id == conversation_id)
+        .order_by(Message.message_order.desc())
+        .limit(history_messages)
+        .all()
+    )
+    if not rows:
+        return ""
+
+    rows.reverse()
+    lines = []
+    for msg in rows:
+        role = (msg.role or "user").strip().lower()
+        role_label = "Usuario" if role == "user" else "Asistente"
+        lines.append(f"{role_label}: {msg.content}")
+    return "\n".join(lines)
 
 
 @router.post("/ingestion/pending")
@@ -50,8 +142,202 @@ def trigger_html_ingestion(scraped_document_id: int):
 
 @router.post("/query")
 def rag_query(request: RagQuestionRequest):
-    service = RagQueryService()
-    return service.answer(question=request.question, use_rerank=request.use_rerank)
+    started = time.perf_counter()
+    db = SessionLocal()
+    active_provider = settings.llm_provider.lower()
+    active_model = settings.llm_model_name
+    try:
+        runtime = get_runtime_llm_config(db)
+        active_provider = runtime.get("llm_provider", settings.llm_provider).lower()
+        active_model = runtime.get("llm_model_name", settings.llm_model_name)
+        active_model_path = runtime.get("llm_model_path", settings.llm_model_path)
+
+        service = RagQueryService(
+            llm_provider=active_provider,
+            llm_model_name=active_model,
+            llm_model_path=active_model_path,
+        )
+        result = service.answer(
+            question=request.question,
+            use_rerank=request.use_rerank,
+        )
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        usage = create_llm_usage_log(
+            db=db,
+            provider=active_provider,
+            model_name=active_model,
+            prompt_text=request.question,
+            response_text=str(result.get("answer") or ""),
+            status="success",
+            latency_ms=latency_ms,
+        )
+        result["llm_usage_log_id"] = usage.id
+        return result
+    except Exception as exc:
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        create_llm_usage_log(
+            db=db,
+            provider=active_provider,
+            model_name=active_model,
+            prompt_text=request.question,
+            response_text="",
+            status="failed",
+            latency_ms=latency_ms,
+            error_message=str(exc),
+        )
+        raise
+    finally:
+        db.close()
+
+
+@router.post("/ask")
+def rag_ask(request: RagQuestionRequest):
+    # Alias explicito para inferencia RAG sin manejo de historial conversacional.
+    return rag_query(request)
+
+
+@router.post("/chat")
+def rag_chat(request: RagChatRequest):
+    started = time.perf_counter()
+    db = SessionLocal()
+    active_provider = settings.llm_provider.lower()
+    active_model = settings.llm_model_name
+    conversation = None
+    user_message = None
+
+    try:
+        runtime = get_runtime_llm_config(db)
+        active_provider = runtime.get("llm_provider", settings.llm_provider).lower()
+        active_model = runtime.get("llm_model_name", settings.llm_model_name)
+        active_model_path = runtime.get("llm_model_path", settings.llm_model_path)
+
+        conversation = _resolve_or_create_conversation(db, request)
+        history_text = _history_as_text(
+            db,
+            conversation_id=conversation.id,
+            history_messages=request.history_messages,
+        )
+
+        next_order = _next_message_order(db, conversation.id)
+        user_message = Message(
+            conversation_id=conversation.id,
+            role="user",
+            content=request.question,
+            message_order=next_order + 1,
+            created_at=datetime.now(timezone.utc),
+        )
+        db.add(user_message)
+        db.flush()
+
+        service = RagQueryService(
+            llm_provider=active_provider,
+            llm_model_name=active_model,
+            llm_model_path=active_model_path,
+        )
+        result = service.answer(
+            question=request.question,
+            use_rerank=request.use_rerank,
+            conversation_history=history_text,
+        )
+
+        assistant_message = Message(
+            conversation_id=conversation.id,
+            role="assistant",
+            content=str(result.get("answer") or ""),
+            message_order=next_order + 2,
+            created_at=datetime.now(timezone.utc),
+        )
+        conversation.updated_at = datetime.now(timezone.utc)
+        db.add(assistant_message)
+        db.flush()
+
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        usage = create_llm_usage_log(
+            db=db,
+            provider=active_provider,
+            model_name=active_model,
+            prompt_text=request.question,
+            response_text=str(result.get("answer") or ""),
+            status="success",
+            message_id=assistant_message.id,
+            conversation_id=conversation.id,
+            latency_ms=latency_ms,
+        )
+
+        return {
+            "conversation_id": conversation.id,
+            "session_id": conversation.session_id,
+            "history_messages_used": request.history_messages,
+            "llm_usage_log_id": usage.id,
+            **result,
+        }
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc))
+    except Exception as exc:
+        db.rollback()
+        latency_ms = int((time.perf_counter() - started) * 1000)
+        if conversation is not None:
+            create_llm_usage_log(
+                db=db,
+                provider=active_provider,
+                model_name=active_model,
+                prompt_text=request.question,
+                response_text="",
+                status="failed",
+                message_id=(user_message.id if user_message else None),
+                conversation_id=conversation.id,
+                latency_ms=latency_ms,
+                error_message=str(exc),
+            )
+        raise
+    finally:
+        db.close()
+
+
+@router.get("/chat/{conversation_id}/messages")
+def rag_chat_messages(conversation_id: int, limit: int = 50, offset: int = 0):
+    db = SessionLocal()
+    try:
+        conversation = db.get(Conversation, conversation_id)
+        if conversation is None:
+            return {
+                "conversation_id": conversation_id,
+                "total": 0,
+                "items": [],
+            }
+
+        total = (
+            db.query(Message).filter(Message.conversation_id == conversation_id).count()
+        )
+        rows = (
+            db.query(Message)
+            .filter(Message.conversation_id == conversation_id)
+            .order_by(Message.message_order.asc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+
+        return {
+            "conversation_id": conversation_id,
+            "session_id": conversation.session_id,
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "items": [
+                {
+                    "id": row.id,
+                    "role": row.role,
+                    "content": row.content,
+                    "message_order": row.message_order,
+                    "created_at": row.created_at,
+                }
+                for row in rows
+            ],
+        }
+    finally:
+        db.close()
 
 
 # --- Celery/status: Consultar estado de procesamiento de PDF ---
