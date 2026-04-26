@@ -35,13 +35,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copia el archivo de requerimientos e instala las dependencias
 COPY ./requirements.txt /app/requirements.txt
 
-# Actualizamos pip e instalamos hf_xet directamente para evitar el warning
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir hf_xet && \
     pip install --no-cache-dir -r /app/requirements.txt
 
 # Copia el código de la aplicación
 COPY ./app /app/app
+COPY ./app/ui /app/ui
 
 # Establece el PYTHONPATH para que puedas importar desde "app"
 ENV PYTHONPATH="${PYTHONPATH}:/app/app"

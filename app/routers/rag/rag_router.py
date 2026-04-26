@@ -20,6 +20,12 @@ from app.services.llm.runtime_config_service import get_runtime_llm_config
 from app.services.llm.usage_logging_service import create_llm_usage_log
 from app.services.rag.rag_query_service import RagQueryService
 
+# --- Importar función de analytics para reutilizar lógica de listado ---
+try:
+    from app.controllers.analytics.analytics_controller import get_recent_conversations
+except ImportError:
+    get_recent_conversations = None
+
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
 
 
@@ -365,6 +371,89 @@ def get_pdf_file_status(document_file_id: int):
             "summary": file_row.summary,
             "file_path": file_row.file_path,
             "processed_at": file_row.processed_at,
+        }
+    finally:
+        db.close()
+
+
+# --- NUEVO: Listar conversaciones activas ---
+@router.get("/conversations")
+def list_conversations(limit: int = 50, offset: int = 0, q: str = None):
+    """
+    Devuelve la lista de conversaciones activas para mostrar en el frontend.
+    """
+    db = SessionLocal()
+    try:
+        # Si existe función reutilizable de analytics, úsala
+        if get_recent_conversations:
+            items = get_recent_conversations(db=db, limit=limit, q=q)
+            total = len(items)
+            return {
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+                "items": items[offset : offset + limit],
+            }
+
+        # Si no, implementa aquí
+        query = db.query(Conversation)
+        if q:
+            term = f"%{q.strip()}%"
+            query = query.filter(
+                (Conversation.title.ilike(term)) | (Conversation.session_id.ilike(term))
+            )
+        total = query.count()
+        rows = (
+            query.order_by(Conversation.updated_at.desc(), Conversation.id.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
+        # Obtener métricas de mensajes
+        conversation_ids = [row.id for row in rows]
+        metrics_rows = (
+            db.query(
+                Message.conversation_id.label("conversation_id"),
+                func.count(Message.id).label("message_count"),
+                func.max(Message.created_at).label("last_message_at"),
+            )
+            .filter(Message.conversation_id.in_(conversation_ids))
+            .group_by(Message.conversation_id)
+            .all()
+        )
+        metrics = {
+            row.conversation_id: {
+                "message_count": int(row.message_count or 0),
+                "last_message_at": (
+                    row.last_message_at.isoformat() if row.last_message_at else None
+                ),
+            }
+            for row in metrics_rows
+        }
+        items = []
+        for row in rows:
+            item_metrics = metrics.get(row.id, {})
+            items.append(
+                {
+                    "id": int(row.id),
+                    "session_id": row.session_id,
+                    "title": row.title or "Chat",
+                    "channel": row.channel,
+                    "created_at": (
+                        row.created_at.isoformat() if row.created_at else None
+                    ),
+                    "updated_at": (
+                        row.updated_at.isoformat() if row.updated_at else None
+                    ),
+                    "message_count": int(item_metrics.get("message_count", 0)),
+                    "last_message_at": item_metrics.get("last_message_at"),
+                }
+            )
+        return {
+            "total": total,
+            "limit": limit,
+            "offset": offset,
+            "items": items,
         }
     finally:
         db.close()

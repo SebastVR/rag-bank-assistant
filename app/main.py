@@ -8,6 +8,7 @@ from app.config.settings import settings
 from app.db.base import Base
 from app.db.db_connection import SessionLocal, engine
 from app.routers.admin.populate_router import router as populate_router
+from app.routers.analytics.analytics_router import router as analytics_router
 from app.routers.db.connection_router import router as connection_router
 from app.routers.db.document_router import router as document_router
 from app.routers.db.model_router import router as model_router
@@ -30,6 +31,7 @@ api = FastAPI(
         {"name": "db:documents", "description": "Lecturas de modelos de documentos"},
         {"name": "db:models", "description": "Lecturas de modelos internos"},
         {"name": "llm", "description": "Gestion de modelos LLM y runtime"},
+        {"name": "analytics", "description": "Metricas de uso, costos y latencia"},
     ],
 )
 
@@ -42,6 +44,7 @@ api.include_router(document_router)
 api.include_router(scraping_run_router)
 api.include_router(model_router)
 api.include_router(llm_router)
+api.include_router(analytics_router)
 
 
 @api.get("/")
