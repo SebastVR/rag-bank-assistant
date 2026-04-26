@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.models.language_model import LanguageModel
 
 
+# ────────────────────────────────────────────────────────────────
 @dataclass(frozen=True)
 class LanguageModelSeed:
     name: str
@@ -47,7 +48,9 @@ DEFAULT_LANGUAGE_MODELS: tuple[LanguageModelSeed, ...] = (
 )
 
 
+# ────────────────────────────────────────────────────────────────
 def ensure_default_language_models(db: Session) -> dict[str, int]:
+    """Asegura que los modelos de lenguaje por defecto existan en la base de datos."""
     created = 0
     updated = 0
     now = datetime.now(timezone.utc)

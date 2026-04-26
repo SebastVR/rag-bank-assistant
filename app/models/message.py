@@ -5,6 +5,9 @@ from app.db.base import Base
 
 
 class Message(Base):
+    """Mensaje de una conversación almacenado en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "messages"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

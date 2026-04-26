@@ -5,6 +5,9 @@ from app.db.base import Base
 
 
 class LLMUsageLog(Base):
+    """Registro de uso de modelos LLM en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "llm_usage_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

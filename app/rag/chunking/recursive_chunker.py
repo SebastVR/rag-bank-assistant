@@ -5,12 +5,19 @@ from typing import Dict, List
 from app.rag.chunking.base import BaseChunker, ChunkedText
 
 
+# ────────────────────────────────────────────────────────────────
 class RecursiveTextChunker(BaseChunker):
+    """Chunker recursivo que divide texto en fragmentos con solapamiento."""
+
+    # ────────────────────────────────────────────────────────────────
     def __init__(self, chunk_size: int = 900, chunk_overlap: int = 150):
+        """Inicializa el chunker con tamaño y solapamiento configurables."""
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
 
+    # ────────────────────────────────────────────────────────────────
     def _split_recursive(self, text: str, separators: List[str]) -> List[str]:
+        """Divide recursivamente el texto usando los separadores dados."""
         if len(text) <= self.chunk_size or not separators:
             return [text]
 
@@ -37,7 +44,10 @@ class RecursiveTextChunker(BaseChunker):
             if buffer:
                 candidate_chunks.append(buffer)
         else:
-            candidate_chunks = [text[i : i + self.chunk_size] for i in range(0, len(text), self.chunk_size)]
+            candidate_chunks = [
+                text[i : i + self.chunk_size]
+                for i in range(0, len(text), self.chunk_size)
+            ]
 
         output: List[str] = []
         for chunk in candidate_chunks:
@@ -47,7 +57,9 @@ class RecursiveTextChunker(BaseChunker):
                 output.extend(self._split_recursive(chunk, separators[1:]))
         return output
 
+    # ────────────────────────────────────────────────────────────────
     def _apply_overlap(self, chunks: List[str]) -> List[str]:
+        """Aplica solapamiento entre los chunks generados."""
         if not chunks or self.chunk_overlap <= 0:
             return chunks
 
@@ -63,7 +75,9 @@ class RecursiveTextChunker(BaseChunker):
 
         return with_overlap
 
+    # ────────────────────────────────────────────────────────────────
     def chunk(self, text: str, metadata: Dict[str, object]) -> List[ChunkedText]:
+        """Divide un texto largo en chunks con metadatos y solapamiento."""
         separators = ["\n\n", "\n", ". ", " ", ""]
         raw_chunks = self._split_recursive(text, separators)
         raw_chunks = self._apply_overlap(raw_chunks)

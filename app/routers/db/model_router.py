@@ -14,6 +14,7 @@ from app.db.db_connection import get_db
 router = APIRouter(prefix="/api/v1/db/models", tags=["db:models"])
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/language-models")
 def get_language_models(
     provider: Optional[str] = Query(default=None),
@@ -22,6 +23,7 @@ def get_language_models(
     offset: int = Query(default=0, ge=0),
     db=Depends(get_db),
 ):
+    """Lista los modelos de lenguaje disponibles."""
     try:
         return list_language_models(
             db=db,
@@ -36,6 +38,7 @@ def get_language_models(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/document-sections")
 def get_document_sections(
     scraped_document_id: Optional[int] = Query(default=None, ge=1),
@@ -44,6 +47,7 @@ def get_document_sections(
     offset: int = Query(default=0, ge=0),
     db=Depends(get_db),
 ):
+    """Lista las secciones de documentos."""
     try:
         return list_document_sections(
             db=db,
@@ -58,6 +62,7 @@ def get_document_sections(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/document-chunks")
 def get_document_chunks(
     scraped_document_id: Optional[int] = Query(default=None, ge=1),
@@ -68,6 +73,7 @@ def get_document_chunks(
     offset: int = Query(default=0, ge=0),
     db=Depends(get_db),
 ):
+    """Lista los fragmentos (chunks) de documentos."""
     try:
         return list_document_chunks(
             db=db,
@@ -84,8 +90,10 @@ def get_document_chunks(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/document-chunks/scraped-document-ids")
 def get_chunk_scraped_document_ids(db=Depends(get_db)):
+    """Lista los IDs de documentos scrapeados con chunks."""
     try:
         return list_chunk_scraped_document_ids(db=db)
     except TypeError as e:
@@ -94,6 +102,7 @@ def get_chunk_scraped_document_ids(db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/llm-usage-logs")
 def get_llm_usage_logs(
     provider: Optional[str] = Query(default=None),
@@ -105,6 +114,7 @@ def get_llm_usage_logs(
     offset: int = Query(default=0, ge=0),
     db=Depends(get_db),
 ):
+    """Lista los logs de uso de modelos LLM."""
     try:
         return list_llm_usage_logs(
             db=db,

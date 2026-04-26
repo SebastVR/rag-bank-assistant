@@ -7,10 +7,16 @@ from app.rag.llm.base import BaseLLMClient
 
 
 class BedrockClient(BaseLLMClient):
+    """Cliente para interactuar con modelos Bedrock de AWS."""
+
+    # ─────────────────────────────────────────────────────────────
     def __init__(self, model_id: str):
+        """Inicializa el cliente con el ID del modelo."""
         self.model_id = model_id
 
+    # ─────────────────────────────────────────────────────────────
     def generate(self, prompt: str, system_prompt: str | None = None) -> str:
+        """Genera una respuesta usando el modelo Bedrock."""
         try:
             import boto3
         except ImportError as exc:

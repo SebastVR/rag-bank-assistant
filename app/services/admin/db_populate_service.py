@@ -15,6 +15,7 @@ from app.services.scraping.html_processing_service import (
 PDF_URL_RE = re.compile(r"https?://[^\s\"'<>]+?\.pdf(?:\?[^\s\"'<>]*)?", re.IGNORECASE)
 
 
+# ────────────────────────────────────────────────────────────────
 def _extract_pdf_urls(doc: dict) -> set[str]:
     """
     Extrae URLs PDF desde texto, headings y URLs fuente del documento.
@@ -34,6 +35,7 @@ def _extract_pdf_urls(doc: dict) -> set[str]:
     return urls
 
 
+# ────────────────────────────────────────────────────────────────
 def populate_scraped_documents_from_prefix(prefix: str):
     """
     Usa process_all_html_and_return_json para obtener los docs
@@ -44,6 +46,7 @@ def populate_scraped_documents_from_prefix(prefix: str):
     return _populate_scraped_documents(docs, prefix)
 
 
+# ────────────────────────────────────────────────────────────────
 def _populate_scraped_documents(docs: dict, prefix: str):
     """
     Lee el JSON de documentos únicos y los inserta en la base de datos.
@@ -109,7 +112,9 @@ def _populate_scraped_documents(docs: dict, prefix: str):
             if not pdf_title:
                 continue
             # Verificar si ya existe un PDF con ese título
-            existing_pdf = session.query(DocumentFile).filter_by(title=pdf_title).first()
+            existing_pdf = (
+                session.query(DocumentFile).filter_by(title=pdf_title).first()
+            )
             if existing_pdf:
                 continue
             pdf_file = DocumentFile(

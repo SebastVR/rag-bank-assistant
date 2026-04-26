@@ -6,6 +6,9 @@ from app.db.base import Base
 
 
 class ScrapingRun(Base):
+    """Ejecución de scraping registrada en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "scraping_runs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

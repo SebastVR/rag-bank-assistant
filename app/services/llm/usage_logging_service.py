@@ -9,7 +9,9 @@ from app.models.language_model import LanguageModel
 from app.models.llm_usage_log import LLMUsageLog
 
 
+# ────────────────────────────────────────────────────────────────
 def _normalize_provider(provider: str) -> str:
+    """Normaliza el nombre del proveedor LLM para uso interno."""
     value = (provider or "").strip().lower()
     aliases = {
         "openai": "chatgpt",
@@ -18,7 +20,9 @@ def _normalize_provider(provider: str) -> str:
     return aliases.get(value, value)
 
 
+# ────────────────────────────────────────────────────────────────
 def _estimate_tokens(text: str) -> int:
+    """Estima la cantidad de tokens en un texto dado."""
     cleaned = (text or "").strip()
     if not cleaned:
         return 0
@@ -26,7 +30,9 @@ def _estimate_tokens(text: str) -> int:
     return max(1, int(words * 1.3))
 
 
+# ────────────────────────────────────────────────────────────────
 def _compute_cost(tokens: int, per_token_cost: Decimal | int | float | None) -> Decimal:
+    """Calcula el costo total dado el número de tokens y el costo por token."""
     if not per_token_cost:
         return Decimal("0")
     return (Decimal(tokens) * Decimal(str(per_token_cost))).quantize(
@@ -34,11 +40,13 @@ def _compute_cost(tokens: int, per_token_cost: Decimal | int | float | None) -> 
     )
 
 
+# ────────────────────────────────────────────────────────────────
 def _resolve_model_costs(
     db: Session,
     provider: str,
     model_name: str,
 ) -> tuple[Decimal, Decimal]:
+    """Obtiene el costo por token de entrada y salida para un modelo dado."""
     normalized_provider = _normalize_provider(provider)
     row = (
         db.query(LanguageModel)
@@ -64,6 +72,7 @@ def _resolve_model_costs(
     )
 
 
+# ────────────────────────────────────────────────────────────────
 def create_llm_usage_log(
     db: Session,
     *,
@@ -77,6 +86,7 @@ def create_llm_usage_log(
     latency_ms: int | None = None,
     error_message: str | None = None,
 ) -> LLMUsageLog:
+    """Crea y guarda un registro de uso de LLM en la base de datos."""
     input_tokens = _estimate_tokens(prompt_text)
     output_tokens = _estimate_tokens(response_text)
     total_tokens = input_tokens + output_tokens

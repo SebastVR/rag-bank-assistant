@@ -5,6 +5,9 @@ from app.db.base import Base
 
 
 class ScrapedDocument(Base):
+    """Documento extraído y procesado por el sistema."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "scraped_documents"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -20,7 +23,9 @@ class ScrapedDocument(Base):
     raw_file_path = Column(Text, nullable=False)
     processed_file_path = Column(Text)
     content_hash = Column(String, unique=True)
-    status = Column(String, nullable=False, comment="raw_saved, processed, failed, vectorized")
+    status = Column(
+        String, nullable=False, comment="raw_saved, processed, failed, vectorized"
+    )
     error_message = Column(Text)
     scraped_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), nullable=False)

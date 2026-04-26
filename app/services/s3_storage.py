@@ -5,12 +5,14 @@ from botocore.exceptions import ClientError
 from app.config.settings import settings
 
 
+# ────────────────────────────────────────────────────────────────
 class S3Storage:
     """
     Clase general para manejar almacenamiento en S3 o MinIO usando boto3.
     Elige el backend según settings.app_env: 'dev' (MinIO) o 'prod' (AWS S3).
     """
 
+    # ────────────────────────────────────────────────────────────────
     def __init__(self):
         env = settings.app_env.lower()
         self.env = env
@@ -33,6 +35,7 @@ class S3Storage:
                 config=Config(signature_version="s3v4"),
             )
 
+    # ────────────────────────────────────────────────────────────────
     def write_file(self, folder, object_name, file_data):
         """
         Sube un archivo a la carpeta indicada dentro del bucket.
@@ -61,6 +64,7 @@ class S3Storage:
 
         return full_path
 
+    # ────────────────────────────────────────────────────────────────
     def read_file(self, folder, object_name):
         """
         Lee un archivo del bucket y devuelve su contenido en bytes.
@@ -82,6 +86,7 @@ class S3Storage:
         except Exception as e:
             raise Exception(f"Error al leer el archivo del bucket: {str(e)}")
 
+    # ────────────────────────────────────────────────────────────────
     def list_objects(self, folder, suffix=None):
         """
         Lista objetos dentro de una carpeta del bucket.
@@ -113,6 +118,7 @@ class S3Storage:
 
         return keys
 
+    # ────────────────────────────────────────────────────────────────
     def get_public_url(self, folder, object_name):
         """
         Devuelve una URL pública si el bucket/objeto es público.
@@ -124,6 +130,7 @@ class S3Storage:
             return f"{endpoint}/{self.bucket_name}/{full_path}"
         return f"https://{self.bucket_name}.s3.amazonaws.com/{full_path}"
 
+    # ────────────────────────────────────────────────────────────────
     def generate_presigned_url(self, folder, object_name, expiration=3600):
         """
         Genera una URL presignada para acceder al archivo.
@@ -144,6 +151,7 @@ class S3Storage:
             print(f"Error al generar el enlace presignado: {str(e)}")
             return None
 
+    # ────────────────────────────────────────────────────────────────
     def delete_object(self, folder, object_name):
         """
         Elimina un archivo del bucket.
@@ -158,6 +166,7 @@ class S3Storage:
         except Exception as e:
             raise Exception(f"Error al eliminar el archivo en el bucket: {str(e)}")
 
+    # ────────────────────────────────────────────────────────────────
     def delete_objects(self, folder, object_keys):
         """
         Elimina varios archivos del bucket.
@@ -184,6 +193,7 @@ class S3Storage:
         except Exception as e:
             raise Exception(f"Error al eliminar archivos en el bucket: {str(e)}")
 
+    # ────────────────────────────────────────────────────────────────
     def bucket_exists(self):
         """
         Verifica si el bucket existe.
@@ -194,6 +204,7 @@ class S3Storage:
         except ClientError:
             return False
 
+    # ────────────────────────────────────────────────────────────────
     def create_bucket_if_not_exists(self):
         """
         Crea el bucket si no existe.
@@ -219,6 +230,7 @@ class S3Storage:
         except Exception as e:
             raise Exception(f"Error al crear el bucket: {str(e)}")
 
+    # ────────────────────────────────────────────────────────────────
     def _build_path(self, folder, object_name):
         """
         Construye la ruta final del archivo dentro del bucket.

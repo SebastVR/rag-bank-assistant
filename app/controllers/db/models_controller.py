@@ -12,23 +12,31 @@ from app.models.llm_usage_log import LLMUsageLog
 from app.models.scraped_document import ScrapedDocument
 
 
+# ─────────────────────────────────────────────────────────────
 def _ensure_session(db: Any) -> Session:
+    """Verifica que el objeto db sea una sesión de SQLAlchemy."""
     if not isinstance(db, Session):
         raise TypeError("Este endpoint solo soporta SQLAlchemy Session (APP_ENV=dev)")
     return db
 
 
+# ─────────────────────────────────────────────────────────────
 def _to_iso(value: Any) -> Optional[str]:
+    """Convierte un valor datetime a string ISO 8601."""
     return value.isoformat() if value is not None else None
 
 
+# ─────────────────────────────────────────────────────────────
 def _to_decimal_str(value: Any) -> str:
+    """Convierte un valor Decimal a string decimal plano."""
     if isinstance(value, Decimal):
         return format(value, "f")
     return str(value or 0)
 
 
+# ─────────────────────────────────────────────────────────────
 def _parse_json(value: Any) -> dict[str, Any]:
+    """Parsea un string JSON o dict a un diccionario de Python."""
     if isinstance(value, dict):
         return value
     if isinstance(value, str):
@@ -40,6 +48,7 @@ def _parse_json(value: Any) -> dict[str, Any]:
     return {}
 
 
+# ─────────────────────────────────────────────────────────────
 def list_language_models(
     db: Any,
     provider: Optional[str] = None,
@@ -47,6 +56,7 @@ def list_language_models(
     limit: int = 20,
     offset: int = 0,
 ) -> dict[str, Any]:
+    """Lista los modelos de lenguaje registrados con filtros y paginación."""
     session = _ensure_session(db)
     query = session.query(LanguageModel)
 
@@ -92,6 +102,7 @@ def list_language_models(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def list_document_sections(
     db: Any,
     scraped_document_id: Optional[int] = None,
@@ -99,6 +110,7 @@ def list_document_sections(
     limit: int = 20,
     offset: int = 0,
 ) -> dict[str, Any]:
+    """Lista las secciones de documentos extraídos con filtros y paginación."""
     session = _ensure_session(db)
 
     query = session.query(
@@ -142,6 +154,7 @@ def list_document_sections(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def list_document_chunks(
     db: Any,
     scraped_document_id: Optional[int] = None,
@@ -151,6 +164,7 @@ def list_document_chunks(
     limit: int = 20,
     offset: int = 0,
 ) -> dict[str, Any]:
+    """Lista los fragmentos de documentos extraídos con filtros y paginación."""
     session = _ensure_session(db)
 
     query = session.query(
@@ -209,6 +223,7 @@ def list_document_chunks(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def list_llm_usage_logs(
     db: Any,
     provider: Optional[str] = None,
@@ -219,6 +234,7 @@ def list_llm_usage_logs(
     limit: int = 20,
     offset: int = 0,
 ) -> dict[str, Any]:
+    """Lista los registros de uso de LLMs con filtros y paginación."""
     session = _ensure_session(db)
     query = session.query(LLMUsageLog)
 
@@ -263,7 +279,9 @@ def list_llm_usage_logs(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def list_chunk_scraped_document_ids(db: Any) -> dict[str, Any]:
+    """Lista los IDs de documentos extraídos con cantidad de chunks y última fecha."""
     session = _ensure_session(db)
 
     rows = (

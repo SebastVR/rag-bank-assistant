@@ -14,6 +14,9 @@ from app.db.base import Base
 
 
 class RetrievalLog(Base):
+    """Registro de recuperación de fragmentos de documentos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "retrieval_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

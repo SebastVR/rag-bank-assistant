@@ -8,12 +8,14 @@ from app.models.scraping_run import ScrapingRun
 router = APIRouter(prefix="/api/v1/db/scraping/runs", tags=["db:scraping"])
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/", summary="Listar ejecuciones de scraping", response_model=None)
 def list_scraping_runs(
     db: Session = Depends(get_db),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
 ):
+    """Lista las ejecuciones de scraping realizadas."""
     query = db.query(ScrapingRun).order_by(ScrapingRun.id.desc())
     total = query.count()
     runs = query.offset(offset).limit(limit).all()

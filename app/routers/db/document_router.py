@@ -13,6 +13,7 @@ from app.schemas.document import ListResponse, ScrapedDocumentDetail
 router = APIRouter(prefix="/api/v1/db/documents", tags=["db:documents"])
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/scraped", response_model=ListResponse)
 def get_scraped_documents(
     limit: int = Query(default=20, ge=1, le=200),
@@ -21,6 +22,7 @@ def get_scraped_documents(
     status: Optional[str] = Query(default=None),
     db=Depends(get_db),
 ):
+    """Lista los documentos scrapeados."""
     try:
         result = list_scraped_documents(
             db=db,
@@ -36,11 +38,13 @@ def get_scraped_documents(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/scraped/{doc_id}", response_model=ScrapedDocumentDetail)
 def get_scraped_document(
     doc_id: str,
     db=Depends(get_db),
 ):
+    """Obtiene el detalle de un documento scrapeado."""
     try:
         result = get_scraped_document_detail(db=db, doc_id=doc_id)
         return ScrapedDocumentDetail(**result)
@@ -52,6 +56,7 @@ def get_scraped_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/files", response_model=ListResponse)
 def get_document_files(
     file_type: Optional[str] = Query(default="pdf"),
@@ -61,6 +66,7 @@ def get_document_files(
     offset: int = Query(default=0, ge=0),
     db=Depends(get_db),
 ):
+    """Lista los archivos de documentos según filtros."""
     try:
         result = list_document_files(
             db=db,

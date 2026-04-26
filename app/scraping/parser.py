@@ -7,12 +7,14 @@ from urllib.parse import urljoin, urlparse
 from bs4 import BeautifulSoup
 
 
+# ────────────────────────────────────────────────────────────────
 @dataclass
 class ParsedSection:
     heading: str
     content: str
 
 
+# ────────────────────────────────────────────────────────────────
 @dataclass
 class ParsedPage:
     url: str
@@ -24,10 +26,13 @@ class ParsedPage:
     sections: List[ParsedSection] = field(default_factory=list)
 
 
+# ────────────────────────────────────────────────────────────────
 class HtmlParser:
-    """Parsea HTML y extrae estructura base."""
+    """Parsea HTML y extrae la estructura principal de la página."""
 
+    # ────────────────────────────────────────────────────────────────
     def parse(self, html: str, base_url: str) -> ParsedPage:
+        """Parsea el HTML y retorna la estructura de la página."""
         soup = BeautifulSoup(html, "lxml")
 
         title = self._extract_title(soup)
@@ -47,7 +52,9 @@ class HtmlParser:
             sections=sections,
         )
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_title(self, soup: BeautifulSoup) -> str:
+        """Extrae el título principal de la página."""
         if soup.title and soup.title.text:
             return self._clean_text(soup.title.get_text(" ", strip=True))
 
@@ -57,7 +64,9 @@ class HtmlParser:
 
         return "Sin título"
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_headings(self, soup: BeautifulSoup) -> List[str]:
+        """Extrae los encabezados h1, h2, h3 de la página."""
         results: List[str] = []
 
         for tag_name in ["h1", "h2", "h3"]:
@@ -68,7 +77,9 @@ class HtmlParser:
 
         return results
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_paragraphs(self, soup: BeautifulSoup) -> List[str]:
+        """Extrae los párrafos principales de la página."""
         results: List[str] = []
 
         for tag in soup.find_all("p"):
@@ -78,7 +89,9 @@ class HtmlParser:
 
         return results
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_list_items(self, soup: BeautifulSoup) -> List[str]:
+        """Extrae los ítems de listas de la página."""
         results: List[str] = []
 
         for tag in soup.find_all("li"):
@@ -88,7 +101,9 @@ class HtmlParser:
 
         return results
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_internal_links(self, soup: BeautifulSoup, base_url: str) -> List[str]:
+        """Extrae los enlaces internos de la página."""
         results: List[str] = []
         base_domain = urlparse(base_url).netloc
 
@@ -111,7 +126,9 @@ class HtmlParser:
 
         return results
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_sections(self, soup: BeautifulSoup) -> List[ParsedSection]:
+        """Extrae secciones agrupadas por encabezados."""
         sections: List[ParsedSection] = []
 
         for heading_tag in soup.find_all(["h1", "h2", "h3"]):
@@ -142,5 +159,7 @@ class HtmlParser:
 
         return sections
 
+    # ────────────────────────────────────────────────────────────────
     def _clean_text(self, value: str) -> str:
+        """Limpia y normaliza el texto extraído."""
         return " ".join(value.split())

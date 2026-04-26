@@ -9,10 +9,9 @@ from bs4 import BeautifulSoup
 from app.scraping.parser import ParsedPage
 
 
+# ────────────────────────────────────────────────────────────────
 class HtmlCleaner:
-    """
-    Limpia HTML y contenido parseado para quedarse con el texto más útil.
-    """
+    """Limpia HTML y contenido parseado para extraer el texto útil."""
 
     NOISE_SELECTORS = [
         "script",
@@ -27,7 +26,9 @@ class HtmlCleaner:
         "aside",
     ]
 
+    # ────────────────────────────────────────────────────────────────
     def clean_html(self, html: str) -> str:
+        """Elimina ruido y etiquetas innecesarias del HTML."""
         soup = BeautifulSoup(html, "lxml")
 
         for selector in self.NOISE_SELECTORS:
@@ -68,7 +69,9 @@ class HtmlCleaner:
 
         return str(soup)
 
+    # ────────────────────────────────────────────────────────────────
     def extract_main_text_with_trafilatura(self, html: str) -> Optional[str]:
+        """Extrae el texto principal usando trafilatura."""
         try:
             extracted = trafilatura.extract(
                 html,
@@ -84,7 +87,9 @@ class HtmlCleaner:
             return None
         return None
 
+    # ────────────────────────────────────────────────────────────────
     def clean_parsed_page(self, parsed_page: ParsedPage, cleaned_html: str) -> str:
+        """Limpia y normaliza el contenido de una página parseada."""
         trafilatura_text = self.extract_main_text_with_trafilatura(cleaned_html)
         if trafilatura_text and len(trafilatura_text) >= 100:
             return trafilatura_text
@@ -107,7 +112,9 @@ class HtmlCleaner:
         combined = "\n".join(parts)
         return self.normalize_text(combined)
 
+    # ────────────────────────────────────────────────────────────────
     def normalize_text(self, text: str) -> str:
+        """Normaliza espacios y saltos de línea en el texto."""
         text = text.replace("\xa0", " ")
         text = re.sub(r"\s+", " ", text)
         text = re.sub(r"\n\s*\n", "\n\n", text)

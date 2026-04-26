@@ -4,7 +4,11 @@ from app.rag.llm.base import BaseLLMClient
 
 
 class LlamaCppClient(BaseLLMClient):
+    """Cliente para interactuar con modelos Llama.cpp."""
+
+    # ─────────────────────────────────────────────────────────────
     def __init__(self, model_path: str, n_ctx: int = 4096, n_threads: int = 4):
+        """Inicializa el cliente con la ruta del modelo y configuración."""
         try:
             from llama_cpp import Llama
         except ImportError as exc:
@@ -16,7 +20,9 @@ class LlamaCppClient(BaseLLMClient):
             n_threads=n_threads,
         )
 
+    # ─────────────────────────────────────────────────────────────
     def generate(self, prompt: str, system_prompt: str | None = None) -> str:
+        """Genera una respuesta usando el modelo Llama.cpp."""
         final_prompt = prompt
         if system_prompt:
             final_prompt = f"[SYSTEM]\n{system_prompt}\n\n[USER]\n{prompt}"

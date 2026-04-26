@@ -4,11 +4,12 @@ from abc import ABC, abstractmethod
 from typing import List
 
 
+# ────────────────────────────────────────────────────────────────
 class BaseEmbeddingClient(ABC):
     @abstractmethod
     def embed_texts(self, texts: List[str]) -> List[List[float]]:
-        """Generate embeddings for a list of texts."""
+        """Genera embeddings para una lista de textos."""
 
     @abstractmethod
     def embedding_dimension(self) -> int:
-        """Return embedding vector size."""
+        """Retorna el tamaño del vector de embedding."""

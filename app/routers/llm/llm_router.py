@@ -1,23 +1,47 @@
 from __future__ import annotations
 
 import os
-from decimal import Decimal
 
+from celery.result import AsyncResult
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
+from app.celery_worker.tasks import upload_llm_model_task
 from app.controllers.llm.model_management_controller import (
     activate_llm_model,
     activate_llm_model_by_id,
     list_llm_model_options,
-    upload_llm_model,
 )
 from app.db.db_connection import get_db
 from app.schemas.llm import ActivateModelByIdRequest, ActivateModelRequest
 from app.services.llm.runtime_config_service import get_runtime_llm_config
 
+# --- NUEVO: Endpoint para consultar el estado de una tarea Celery ---
+
 router = APIRouter(prefix="/api/v1/llm", tags=["llm"])
 
 
+# ─────────────────────────────────────────────────────────────
+@router.get("/models/upload/status/{task_id}")
+def get_upload_task_status(task_id: str):
+    """Consulta el estado de una tarea de subida de modelo."""
+    result = AsyncResult(task_id)
+    response = {
+        "task_id": task_id,
+        "state": result.state,
+        "ready": result.ready(),
+        "successful": result.successful() if result.ready() else None,
+        "result": None,
+        "error": None,
+    }
+    if result.ready():
+        if result.successful():
+            response["result"] = result.result
+        else:
+            response["error"] = str(result.result)
+    return response
+
+
+# ─────────────────────────────────────────────────────────────
 @router.post("/models/upload")
 async def upload_model(
     file: UploadFile = File(...),
@@ -26,8 +50,8 @@ async def upload_model(
     input_token_cost: float = Form(default=2.5),
     output_token_cost: float = Form(default=5.0),
     set_as_active: bool = Form(default=True),
-    db=Depends(get_db),
 ):
+    """Sube un modelo LLM usando Celery."""
     try:
         normalized_provider = provider.strip().lower()
         if normalized_provider != "llama_cpp":
@@ -46,25 +70,26 @@ async def upload_model(
                 detail="Solo se permiten archivos .gguf",
             )
 
-        binary = await file.read()
-        if not binary:
-            raise HTTPException(status_code=400, detail="Archivo vacio")
+        # Guardar archivo temporalmente
+        temp_path = f"/tmp/{file.filename}"
+        with open(temp_path, "wb") as f:
+            content = await file.read()
+            if not content:
+                raise HTTPException(status_code=400, detail="Archivo vacio")
+            f.write(content)
 
         resolved_model_name = model_name or os.path.splitext(file.filename)[0]
-        result = upload_llm_model(
-            db=db,
+        # Lanzar tarea Celery
+        task = upload_llm_model_task.delay(
+            file_path=temp_path,
             file_name=file.filename,
-            file_bytes=binary,
             provider=normalized_provider,
             model_name=resolved_model_name.strip(),
-            input_token_cost=Decimal(str(input_token_cost)),
-            output_token_cost=Decimal(str(output_token_cost)),
+            input_token_cost=input_token_cost,
+            output_token_cost=output_token_cost,
             set_as_active=set_as_active,
         )
-        return {
-            "message": "Model uploaded successfully",
-            **result,
-        }
+        return {"message": "Model upload task launched", "task_id": task.id}
     except HTTPException:
         raise
     except TypeError as e:
@@ -73,8 +98,10 @@ async def upload_model(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/models/active")
 def get_active_model(db=Depends(get_db)):
+    """Obtiene el modelo LLM activo actualmente."""
     try:
         return get_runtime_llm_config(db)
     except TypeError as e:
@@ -83,8 +110,10 @@ def get_active_model(db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/models/options")
 def get_model_options(provider: str | None = None, db=Depends(get_db)):
+    """Lista las opciones de modelos LLM disponibles."""
     try:
         runtime = get_runtime_llm_config(db)
         options = list_llm_model_options(db=db, provider=provider)
@@ -100,8 +129,10 @@ def get_model_options(provider: str | None = None, db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/models/activate")
 def activate_model(payload: ActivateModelRequest, db=Depends(get_db)):
+    """Activa un modelo LLM específico."""
     try:
         result = activate_llm_model(
             db=db,
@@ -122,8 +153,10 @@ def activate_model(payload: ActivateModelRequest, db=Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/models/activate/by-id")
 def activate_model_by_id(payload: ActivateModelByIdRequest, db=Depends(get_db)):
+    """Activa un modelo LLM por ID."""
     try:
         result = activate_llm_model_by_id(
             db=db,

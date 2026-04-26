@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 import time
-from typing import Any, Dict, List
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -13,12 +12,11 @@ from app.scraping.fetcher import HtmlFetcher
 from app.services.s3_storage import S3Storage
 
 
+# ────────────────────────────────────────────────────────────────
 def save_html_and_upload_s3(
     html: str, fname: str, out_dir: str, s3_folder: str = "bbva_html"
 ):
-    """
-    Guarda el HTML localmente (si es dev) y siempre lo sube a S3/MinIO.
-    """
+    """Guarda el HTML localmente (dev) y lo sube a S3/MinIO."""
     # Guardar local solo en desarrollo
     if settings.app_env.lower() in ("dev", "development"):
         os.makedirs(out_dir, exist_ok=True)
@@ -32,7 +30,9 @@ def save_html_and_upload_s3(
     return True
 
 
+# ────────────────────────────────────────────────────────────────
 def is_internal_link(href: str, base_domain: str) -> bool:
+    """Determina si un enlace es interno al dominio base."""
     if not href:
         return False
     if href.startswith("/") or base_domain in href:
@@ -40,6 +40,7 @@ def is_internal_link(href: str, base_domain: str) -> bool:
     return False
 
 
+# ────────────────────────────────────────────────────────────────
 def crawl_and_save(
     start_url: str,
     base_domain: str,
@@ -50,6 +51,7 @@ def crawl_and_save(
     delay: float = 1.0,
     s3_folder: str = "bbva_html",
 ):
+    """Crawlea el sitio, guarda HTMLs y manifiesto en S3/MinIO."""
     fetcher = HtmlFetcher(timeout=timeout, user_agent=user_agent)
     visited = set()
     queue = [start_url]

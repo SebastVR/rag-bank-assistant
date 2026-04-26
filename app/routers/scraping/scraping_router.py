@@ -20,11 +20,10 @@ def extract_domain(url: str) -> str:
     return netloc
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/crawl")
 def crawl_site(payload: CrawlRequest):
-    """
-    Inicia el crawling para el dominio especificado y guarda los HTMLs bajo el prefijo correspondiente en S3.
-    """
+    """Inicia el crawling y guarda los HTMLs bajo el prefijo en S3."""
     try:
         if not payload.base_url:
             raise ValueError("base_url es requerido")
@@ -41,19 +40,19 @@ def crawl_site(payload: CrawlRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/process")
 def process_html_documents(
     allowed_domain: str = Query(..., description="Dominio a procesar, e.g. bbva.com.co")
 ):
-    """
-    Procesa los HTMLs scrapeados bajo el prefijo correspondiente al dominio en S3.
-    """
+    """Procesa los HTMLs scrapeados bajo el prefijo del dominio."""
     try:
         return process_scraped_html(allowed_domain=allowed_domain)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/documents")
 def get_processed_documents(
     allowed_domain: str = Query(
@@ -63,6 +62,7 @@ def get_processed_documents(
     offset: int = Query(default=0, ge=0),
     q: str | None = Query(default=None, min_length=1),
 ):
+    """Lista los documentos procesados para un dominio."""
     try:
         return list_processed_documents(
             allowed_domain=allowed_domain, limit=limit, offset=offset, q=q
@@ -73,6 +73,7 @@ def get_processed_documents(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/documents/{doc_id}")
 def get_processed_document_by_id(
     doc_id: str,
@@ -80,6 +81,7 @@ def get_processed_document_by_id(
         ..., description="Dominio a consultar, e.g. bbva.com.co"
     ),
 ):
+    """Obtiene un documento procesado por su ID y dominio."""
     try:
         return get_processed_document(doc_id, allowed_domain=allowed_domain)
     except FileNotFoundError as e:

@@ -8,17 +8,23 @@ from app.models.document_file import DocumentFile
 from app.models.scraped_document import ScrapedDocument
 
 
+# ─────────────────────────────────────────────────────────────
 def _ensure_session(db: Any) -> Session:
+    """Verifica que el objeto db sea una sesión de SQLAlchemy."""
     if not isinstance(db, Session):
         raise TypeError("Este endpoint solo soporta SQLAlchemy Session (APP_ENV=dev)")
     return db
 
 
+# ─────────────────────────────────────────────────────────────
 def _to_iso(value: Any) -> Optional[str]:
+    """Convierte un valor datetime a string ISO 8601."""
     return value.isoformat() if value is not None else None
 
 
+# ─────────────────────────────────────────────────────────────
 def _parse_headings(raw_headings: Any) -> list[str]:
+    """Parsea los headings de un documento (list o JSON string)."""
     if raw_headings is None:
         return []
     if isinstance(raw_headings, list):
@@ -32,6 +38,7 @@ def _parse_headings(raw_headings: Any) -> list[str]:
     return []
 
 
+# ─────────────────────────────────────────────────────────────
 def list_scraped_documents(
     db: Any,
     limit: int = 20,
@@ -39,6 +46,7 @@ def list_scraped_documents(
     q: Optional[str] = None,
     status: Optional[str] = None,
 ) -> dict[str, Any]:
+    """Lista los documentos extraídos con filtros y paginación."""
     session = _ensure_session(db)
 
     query = session.query(ScrapedDocument)
@@ -92,7 +100,9 @@ def list_scraped_documents(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def get_scraped_document_detail(db: Any, doc_id: str) -> dict[str, Any]:
+    """Obtiene el detalle de un documento extraído, incluyendo sus archivos."""
     session = _ensure_session(db)
 
     doc = (
@@ -140,6 +150,7 @@ def get_scraped_document_detail(db: Any, doc_id: str) -> dict[str, Any]:
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def list_document_files(
     db: Any,
     file_type: Optional[str] = "pdf",
@@ -148,6 +159,7 @@ def list_document_files(
     limit: int = 20,
     offset: int = 0,
 ) -> dict[str, Any]:
+    """Lista los archivos de documentos con filtros y paginación."""
     session = _ensure_session(db)
 
     query = session.query(

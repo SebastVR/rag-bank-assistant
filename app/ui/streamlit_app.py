@@ -14,31 +14,41 @@ DEFAULT_HISTORY_MESSAGES = int(os.getenv("CHAT_HISTORY_MESSAGES", "6"))
 REQUEST_TIMEOUT = float(os.getenv("STREAMLIT_HTTP_TIMEOUT", "45"))
 
 
+# ─────────────────────────────────────────────────────────────
 def _api_url(path: str) -> str:
+    """Construye la URL completa para la API."""
     base = API_BASE_URL.rstrip("/")
     normalized_path = path if path.startswith("/") else f"/{path}"
     return f"{base}{normalized_path}"
 
 
+# ─────────────────────────────────────────────────────────────
 def _get(path: str, params: dict | None = None) -> dict:
+    """Realiza una petición GET a la API."""
     with httpx.Client(timeout=REQUEST_TIMEOUT) as client:
         response = client.get(_api_url(path), params=params)
         response.raise_for_status()
         return response.json()
 
 
+# ─────────────────────────────────────────────────────────────
 def _post(path: str, payload: dict) -> dict:
+    """Realiza una petición POST a la API."""
     with httpx.Client(timeout=REQUEST_TIMEOUT) as client:
         response = client.post(_api_url(path), json=payload)
         response.raise_for_status()
         return response.json()
 
 
+# ─────────────────────────────────────────────────────────────
 def fetch_overview(days: int) -> dict:
+    """Obtiene el resumen de analítica para los días indicados."""
     return _get("/api/v1/analytics/overview", params={"days": days})
 
 
+# ─────────────────────────────────────────────────────────────
 def fetch_recent_conversations(search: str, limit: int = 30) -> list[dict]:
+    """Obtiene conversaciones recientes según búsqueda y límite."""
     params = {"limit": limit}
     if search.strip():
         params["q"] = search.strip()
@@ -46,10 +56,11 @@ def fetch_recent_conversations(search: str, limit: int = 30) -> list[dict]:
     return data.get("items", [])
 
 
-# --- Nueva función para crear conversación ---
+# ─────────────────────────────────────────────────────────────
 def create_conversation(
     title: str | None = None, session_id: str | None = None
 ) -> dict:
+    """Crea una nueva conversación en el backend."""
     payload = {}
     if title:
         payload["title"] = title
@@ -58,12 +69,16 @@ def create_conversation(
     return _post("/api/v1/rag/conversations", payload)
 
 
+# ─────────────────────────────────────────────────────────────
 def fetch_messages(conversation_id: int, limit: int = 100) -> list[dict]:
+    """Obtiene los mensajes de una conversación por ID."""
     data = _get(f"/api/v1/rag/chat/{conversation_id}/messages", params={"limit": limit})
     return data.get("items", [])
 
 
+# ─────────────────────────────────────────────────────────────
 def ask_chat(question: str, conversation_id: int | None, history_messages: int) -> dict:
+    """Envía una pregunta al chat RAG con historial."""
     payload = {
         "question": question,
         "history_messages": history_messages,
@@ -76,7 +91,9 @@ def ask_chat(question: str, conversation_id: int | None, history_messages: int) 
     return _post("/api/v1/rag/chat", payload)
 
 
+# ─────────────────────────────────────────────────────────────
 def ask_open_question(question: str) -> dict:
+    """Envía una pregunta abierta (sin historial) al índice RAG."""
     payload = {
         "question": question,
         "use_rerank": True,
@@ -84,13 +101,17 @@ def ask_open_question(question: str) -> dict:
     return _post("/api/v1/rag/query", payload)
 
 
+# ─────────────────────────────────────────────────────────────
 def ensure_state() -> None:
+    """Inicializa el estado de sesión de Streamlit si es necesario."""
     st.session_state.setdefault("selected_conversation_id", None)
     st.session_state.setdefault("chat_session_id", str(uuid4()))
     st.session_state.setdefault("open_answer", None)
 
 
+# ─────────────────────────────────────────────────────────────
 def render_sidebar(left_col) -> None:
+    """Renderiza la barra lateral de conversaciones."""
     with left_col:
         st.subheader("Conversaciones")
         search_term = st.text_input("Buscar", placeholder="Titulo o session_id")
@@ -126,7 +147,9 @@ def render_sidebar(left_col) -> None:
                 st.session_state.chat_session_id = row.get("session_id") or str(uuid4())
 
 
+# ─────────────────────────────────────────────────────────────
 def render_chat(center_col) -> None:
+    """Renderiza la interfaz de chat principal."""
     with center_col:
         st.subheader("Chat RAG")
         conversation_id = st.session_state.selected_conversation_id
@@ -196,7 +219,9 @@ def render_chat(center_col) -> None:
                 st.write(answer)
 
 
+# ─────────────────────────────────────────────────────────────
 def render_analytics(right_col) -> None:
+    """Renderiza el panel de analítica y métricas."""
     with right_col:
         st.subheader("Analitica")
         days = st.slider("Ventana (dias)", min_value=7, max_value=90, value=30, step=1)
@@ -273,7 +298,9 @@ def render_analytics(right_col) -> None:
                 st.plotly_chart(fig_model, use_container_width=True)
 
 
+# ─────────────────────────────────────────────────────────────
 def main() -> None:
+    """Función principal: configura y renderiza la app Streamlit."""
     st.set_page_config(
         page_title="RAG Bank Assistant",
         page_icon="\U0001f4ca",

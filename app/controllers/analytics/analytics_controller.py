@@ -10,13 +10,17 @@ from app.models.message import Message
 from app.rag.analytics import get_vectorization_totals
 
 
+# ─────────────────────────────────────────────────────────────
 def _window_start(days: int) -> datetime:
+    """Calcula la fecha de inicio de la ventana de días para KPIs."""
     safe_days = max(1, int(days))
     now = datetime.now(timezone.utc)
     return now - timedelta(days=safe_days)
 
 
+# ─────────────────────────────────────────────────────────────
 def get_analytics_kpis(db, *, days: int = 30) -> dict:
+    """Obtiene los KPIs de analítica para la ventana de días indicada."""
     start = _window_start(days)
 
     total_conversations = db.query(func.count(Conversation.id)).scalar() or 0
@@ -56,7 +60,9 @@ def get_analytics_kpis(db, *, days: int = 30) -> dict:
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def get_analytics_daily_cost(db, *, days: int = 30) -> list[dict]:
+    """Obtiene el costo diario de uso de LLMs para la ventana de días indicada."""
     start = _window_start(days)
 
     rows = (
@@ -83,7 +89,9 @@ def get_analytics_daily_cost(db, *, days: int = 30) -> list[dict]:
     ]
 
 
+# ─────────────────────────────────────────────────────────────
 def get_analytics_daily_latency(db, *, days: int = 30) -> list[dict]:
+    """Obtiene la latencia diaria promedio y máxima de LLMs para la ventana de días indicada."""
     start = _window_start(days)
 
     rows = (
@@ -110,7 +118,9 @@ def get_analytics_daily_latency(db, *, days: int = 30) -> list[dict]:
     ]
 
 
+# ─────────────────────────────────────────────────────────────
 def get_analytics_cost_breakdown(db, *, days: int = 30) -> list[dict]:
+    """Obtiene el desglose de costos por modelo y proveedor de LLMs para la ventana de días indicada."""
     start = _window_start(days)
 
     rows = (
@@ -139,9 +149,11 @@ def get_analytics_cost_breakdown(db, *, days: int = 30) -> list[dict]:
     ]
 
 
+# ─────────────────────────────────────────────────────────────
 def get_recent_conversations(
     db, *, limit: int = 30, q: str | None = None
 ) -> list[dict]:
+    """Obtiene las conversaciones recientes con métricas básicas."""
     safe_limit = max(1, min(int(limit), 100))
     query = db.query(Conversation)
 

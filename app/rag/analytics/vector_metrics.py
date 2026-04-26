@@ -4,7 +4,9 @@ from app.models.document_chunk import DocumentChunk
 from app.models.document_file import DocumentFile
 
 
+# ────────────────────────────────────────────────────────────────
 def get_vectorization_totals(db) -> dict:
+    """Devuelve métricas totales de vectorización de documentos y chunks."""
     vectorized_chunks = (
         db.query(func.count(DocumentChunk.id))
         .filter(DocumentChunk.status == "vectorized")

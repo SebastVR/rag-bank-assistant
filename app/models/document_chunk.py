@@ -5,6 +5,9 @@ from app.db.base import Base
 
 
 class DocumentChunk(Base):
+    """Fragmento de documento almacenado en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "document_chunks"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

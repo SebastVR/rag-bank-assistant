@@ -12,10 +12,12 @@ from tenacity import (
 )
 
 
+# ────────────────────────────────────────────────────────────────
 class FetchError(Exception):
     """Error controlado para problemas al descargar una URL."""
 
 
+# ────────────────────────────────────────────────────────────────
 @dataclass
 class FetchResult:
     url: str
@@ -25,12 +27,17 @@ class FetchResult:
     html: str
 
 
+# ────────────────────────────────────────────────────────────────
 class HtmlFetcher:
+    """Descarga HTML de una URL con manejo de reintentos y headers personalizados."""
+
+    # ────────────────────────────────────────────────────────────────
     def __init__(
         self,
         timeout: int = 20,
         user_agent: Optional[str] = None,
     ) -> None:
+        """Inicializa el fetcher con timeout y user-agent opcional."""
         self.timeout = timeout
         self.user_agent = user_agent or (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -47,6 +54,7 @@ class HtmlFetcher:
             }
         )
 
+    # ────────────────────────────────────────────────────────────────
     @retry(
         reraise=True,
         stop=stop_after_attempt(3),
@@ -54,6 +62,7 @@ class HtmlFetcher:
         retry=retry_if_exception_type((requests.RequestException, FetchError)),
     )
     def fetch(self, url: str) -> FetchResult:
+        """Descarga el HTML de una URL y valida el tipo de contenido."""
         try:
             response = self.session.get(url, timeout=self.timeout, allow_redirects=True)
             response.raise_for_status()

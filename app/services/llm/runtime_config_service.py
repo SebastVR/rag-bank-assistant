@@ -9,13 +9,9 @@ from app.config.settings import settings
 from app.models.system_setting import SystemSetting
 
 
-def _ensure_session(db: Any) -> Session:
-    if not isinstance(db, Session):
-        raise TypeError("Este endpoint solo soporta SQLAlchemy Session (APP_ENV=dev)")
-    return db
-
-
+# ────────────────────────────────────────────────────────────────
 def get_runtime_llm_config(db: Session) -> dict[str, str]:
+    """Obtiene la configuración LLM activa desde la base de datos o settings."""
     config = {
         "llm_provider": settings.llm_provider,
         "llm_model_name": settings.llm_model_name,
@@ -35,6 +31,7 @@ def get_runtime_llm_config(db: Session) -> dict[str, str]:
     return config
 
 
+# ────────────────────────────────────────────────────────────────
 def set_runtime_llm_config(
     db: Session,
     *,
@@ -42,6 +39,7 @@ def set_runtime_llm_config(
     llm_model_name: str,
     llm_model_path: str,
 ) -> None:
+    """Actualiza la configuración LLM activa en la base de datos."""
     now = datetime.now(timezone.utc)
     payload = {
         "llm_provider": llm_provider,

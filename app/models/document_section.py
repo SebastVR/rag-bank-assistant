@@ -5,6 +5,9 @@ from app.db.base import Base
 
 
 class DocumentSection(Base):
+    """Sección de un documento extraído."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "document_sections"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

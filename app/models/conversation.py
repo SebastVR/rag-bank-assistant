@@ -5,6 +5,9 @@ from app.db.base import Base
 
 
 class Conversation(Base):
+    """Conversación registrada en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

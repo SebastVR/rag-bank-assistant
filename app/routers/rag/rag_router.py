@@ -21,13 +21,11 @@ from app.services.llm.usage_logging_service import create_llm_usage_log
 from app.services.rag.rag_query_service import RagQueryService
 from app.util.responses import StandardStreamingResponse
 
-# --- Importar función de analytics para reutilizar lógica de listado ---
 try:
     from app.controllers.analytics.analytics_controller import get_recent_conversations
 except ImportError:
     get_recent_conversations = None
 
-# Importar modelos desde schemas/rag
 
 from app.schemas.rag import (
     ConversationCreateRequest,
@@ -39,9 +37,10 @@ from app.schemas.rag import (
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
 
 
-# --- NUEVO: Crear conversación vacía ---
+# ─────────────────────────────────────────────────────────────
 @router.post("/conversations", response_model=ConversationCreateResponse)
 def create_conversation(request: ConversationCreateRequest):
+    """Crea una nueva conversación vacía."""
     db = SessionLocal()
     try:
         session_id = request.session_id or str(uuid4())
@@ -69,12 +68,10 @@ def create_conversation(request: ConversationCreateRequest):
         db.close()
 
 
-# Endpoint GET para obtener información real de embeddings vectorizados
+# ─────────────────────────────────────────────────────────────
 @router.get("/embeddings")
 def get_embeddings_info():
-    """
-    Devuelve información real de los embeddings vectorizados.
-    """
+    """Devuelve información real de los embeddings vectorizados."""
     db = SessionLocal()
     try:
         vector_metrics = get_vectorization_totals(db)
@@ -107,12 +104,10 @@ def chat_stream_response(question: str):
         time.sleep(0.5)
 
 
-# Endpoint de chat en streaming
+# ─────────────────────────────────────────────────────────────
 @router.post("/chat/streaming")
 async def chat_streaming_endpoint(request: RagQuestionRequest):
-    """
-    Endpoint de chat en streaming (respuesta por chunks).
-    """
+    """Endpoint de chat en streaming (respuesta por chunks)."""
     return StandardStreamingResponse(chat_stream_response(request.question))
 
 
@@ -178,8 +173,10 @@ def _history_as_text(db, conversation_id: int, history_messages: int) -> str:
     return "\n".join(lines)
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/ingestion/pending")
 def trigger_pending_ingestion(limit: int = 20):
+    """Lanza la tarea de ingesta pendiente."""
     task = process_pending_ingestion_task.delay(limit=limit)
     return {
         "message": "Pending ingestion task dispatched",
@@ -188,8 +185,10 @@ def trigger_pending_ingestion(limit: int = 20):
     }
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/ingestion/files/{document_file_id}")
 def trigger_pdf_ingestion(document_file_id: int):
+    """Lanza la tarea de ingesta de PDF."""
     task = process_pdf_file_task.delay(document_file_id=document_file_id)
     return {
         "message": "PDF ingestion task dispatched",
@@ -198,8 +197,10 @@ def trigger_pdf_ingestion(document_file_id: int):
     }
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/ingestion/html/{scraped_document_id}")
 def trigger_html_ingestion(scraped_document_id: int):
+    """Lanza la tarea de ingesta de HTML scrapeado."""
     task = vectorize_html_document_task.delay(scraped_document_id=scraped_document_id)
     return {
         "message": "HTML ingestion task dispatched",
@@ -208,8 +209,10 @@ def trigger_html_ingestion(scraped_document_id: int):
     }
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/query")
 def rag_query(request: RagQuestionRequest):
+    """Realiza una consulta RAG simple (sin historial)."""
     started = time.perf_counter()
     db = SessionLocal()
     active_provider = settings.llm_provider.lower()
@@ -258,14 +261,17 @@ def rag_query(request: RagQuestionRequest):
         db.close()
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/ask")
 def rag_ask(request: RagQuestionRequest):
-    # Alias explicito para inferencia RAG sin manejo de historial conversacional.
+    """Alias explícito para inferencia RAG sin historial conversacional."""
     return rag_query(request)
 
 
+# ─────────────────────────────────────────────────────────────
 @router.post("/chat")
 def rag_chat(request: RagChatRequest):
+    """Realiza un chat RAG con historial conversacional."""
     started = time.perf_counter()
     db = SessionLocal()
     active_provider = settings.llm_provider.lower()
@@ -373,8 +379,10 @@ def rag_chat(request: RagChatRequest):
         db.close()
 
 
+# ─────────────────────────────────────────────────────────────
 @router.get("/chat/{conversation_id}/messages")
 def rag_chat_messages(conversation_id: int, limit: int = 50, offset: int = 0):
+    """Obtiene los mensajes de una conversación específica."""
     db = SessionLocal()
     try:
         conversation = db.get(Conversation, conversation_id)
@@ -419,8 +427,12 @@ def rag_chat_messages(conversation_id: int, limit: int = 50, offset: int = 0):
 
 
 # --- Celery/status: Consultar estado de procesamiento de PDF ---
+
+
+# ─────────────────────────────────────────────────────────────
 @router.get("/status/files/{document_file_id}")
 def get_pdf_file_status(document_file_id: int):
+    """Consulta el estado de procesamiento de un archivo PDF."""
     db = SessionLocal()
     try:
         file_row = db.get(DocumentFile, document_file_id)

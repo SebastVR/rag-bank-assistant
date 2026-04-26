@@ -4,6 +4,9 @@ from app.db.base import Base
 
 
 class AnalyticsEvent(Base):
+    """Evento de analítica registrado en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "analytics_events"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

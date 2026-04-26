@@ -12,7 +12,8 @@ class ChunkedText:
     metadata: Dict[str, object]
 
 
+# ────────────────────────────────────────────────────────────────
 class BaseChunker(ABC):
     @abstractmethod
     def chunk(self, text: str, metadata: Dict[str, object]) -> List[ChunkedText]:
-        """Split a long text into chunks with metadata."""
+        """Divide un texto largo en chunks con metadatos."""

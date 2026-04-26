@@ -25,7 +25,9 @@ SessionLocal = sessionmaker(
 )
 
 
+# ─────────────────────────────────────────────────────────────
 def get_db_session() -> Generator[Session, None, None]:
+    """Obtiene una sesión de base de datos PostgreSQL local."""
     db = None
     try:
         db = SessionLocal()
@@ -42,11 +44,16 @@ def get_db_session() -> Generator[Session, None, None]:
             db.close()
 
 
+# ─────────────────────────────────────────────────────────────
 class SupabaseSingleton:
+    """Singleton para el cliente de Supabase."""
+
     _client = None
 
+    # ─────────────────────────────────────────────────────────
     @classmethod
     def get_client(cls):
+        """Obtiene el cliente de Supabase (singleton)."""
         if cls._client is not None:
             return cls._client
 
@@ -69,13 +76,9 @@ class SupabaseSingleton:
         return cls._client
 
 
+# ─────────────────────────────────────────────────────────────
 def get_db() -> Generator[Any, None, None]:
-    """
-    Dependencia principal para FastAPI.
-
-    APP_ENV=dev  -> PostgreSQL local con SQLAlchemy
-    APP_ENV=prod -> Supabase
-    """
+    """Dependencia principal para FastAPI: retorna sesión local o cliente Supabase."""
 
     env = settings.app_env.lower()
 

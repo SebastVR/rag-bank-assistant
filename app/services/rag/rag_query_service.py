@@ -16,6 +16,7 @@ from app.services.llm.runtime_config_service import get_runtime_llm_config
 from app.services.s3_storage import S3Storage
 
 
+# ────────────────────────────────────────────────────────────────
 @dataclass
 class RetrievalHit:
     score: float
@@ -23,7 +24,11 @@ class RetrievalHit:
     metadata: dict
 
 
+# ────────────────────────────────────────────────────────────────
 class RagQueryService:
+    """Servicio para consultas RAG: recuperación, reranking y generación de respuesta."""
+
+    # ────────────────────────────────────────────────────────────────
     def __init__(
         self,
         *,
@@ -31,6 +36,7 @@ class RagQueryService:
         llm_model_name: str | None = None,
         llm_model_path: str | None = None,
     ):
+        """Inicializa los clientes de embeddings, vector store, reranker y LLM."""
         self.embedder = SentenceTransformerEmbeddingClient(settings.rag_embedding_model)
         self.vector_store = QdrantVectorStore(
             host=settings.qdrant_host,
@@ -44,8 +50,10 @@ class RagQueryService:
         self.llm_model_name = llm_model_name or settings.llm_model_name
         self.llm_model_path = llm_model_path or settings.llm_model_path
 
+    # ────────────────────────────────────────────────────────────────
     @classmethod
     def from_runtime_config(cls) -> "RagQueryService":
+        """Crea una instancia usando la configuración LLM activa en runtime."""
         db = SessionLocal()
         try:
             runtime = get_runtime_llm_config(db)
@@ -58,9 +66,11 @@ class RagQueryService:
             llm_model_path=runtime.get("llm_model_path"),
         )
 
+    # ────────────────────────────────────────────────────────────────
     def retrieve(
         self, question: str, limit: int | None = None, use_rerank: bool = True
     ) -> List[RetrievalHit]:
+        """Recupera los chunks más relevantes para una pregunta, con reranking opcional."""
         if limit is None:
             limit = settings.qdrant_max_chunks_retrieved
 
@@ -88,12 +98,14 @@ class RagQueryService:
         )
         return [hits[idx] for idx, _score in reranked]
 
+    # ────────────────────────────────────────────────────────────────
     def answer(
         self,
         question: str,
         use_rerank: bool = True,
         conversation_history: str | None = None,
     ) -> dict:
+        """Genera una respuesta usando RAG, con contexto recuperado y reranking opcional."""
         hits = self.retrieve(question=question, use_rerank=use_rerank)
         context = "\n\n".join([item.text for item in hits])
         prompt_question = question
@@ -124,7 +136,9 @@ class RagQueryService:
             ],
         }
 
+    # ────────────────────────────────────────────────────────────────
     def _build_llm_client(self):
+        """Construye el cliente LLM adecuado según el proveedor configurado."""
         provider = (self.llm_provider or settings.llm_provider).lower()
         model_name = self.llm_model_name or settings.llm_model_name
         model_path = self.llm_model_path or settings.llm_model_path
@@ -151,7 +165,9 @@ class RagQueryService:
             model_path=self._resolve_llama_model_path(model_path),
         )
 
+    # ────────────────────────────────────────────────────────────────
     def _resolve_llama_model_path(self, model_path: str) -> str:
+        """Resuelve la ruta local del modelo Llama, descargando desde S3 si es necesario."""
         if not model_path.startswith("s3://"):
             return model_path
 

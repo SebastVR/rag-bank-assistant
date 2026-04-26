@@ -4,6 +4,9 @@ from app.db.base import Base
 
 
 class LanguageModel(Base):
+    """Modelo de lenguaje registrado en la base de datos."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "language_models"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

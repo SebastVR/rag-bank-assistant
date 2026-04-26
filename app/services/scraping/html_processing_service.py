@@ -10,6 +10,7 @@ from app.scraping.parser import HtmlParser
 from app.services.s3_storage import S3Storage
 
 
+# ────────────────────────────────────────────────────────────────
 def process_all_html_and_return_json(prefix: str) -> Dict[str, Any]:
     """
     Procesa todos los HTMLs scrapeados bajo el prefijo dado, deduplica y devuelve un dict con los documentos únicos.

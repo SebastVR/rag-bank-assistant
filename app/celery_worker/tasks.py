@@ -1,6 +1,9 @@
+from decimal import Decimal
+
 from celery.utils.log import get_task_logger
 
 from app.celery_worker.celery_config import celery_app
+from app.controllers.llm.model_management_controller import upload_llm_model
 from app.db.db_connection import SessionLocal
 from app.models.document_file import DocumentFile
 from app.models.scraped_document import ScrapedDocument
@@ -9,12 +12,14 @@ from app.services.rag.rag_pipeline_service import get_rag_ingestion_service
 logger = get_task_logger(__name__)
 
 
+# ─────────────────────────────────────────────────────────────
 @celery_app.task(
     name="rag.process_pdf_file_task",
     queue="rag-bank-assistant",
     acks_late=True,
 )
 def process_pdf_file_task(document_file_id: int):
+    """Procesa y vectoriza un archivo PDF por su ID."""
     db = SessionLocal()
     try:
         rag_ingestion_service = get_rag_ingestion_service()
@@ -39,12 +44,14 @@ def process_pdf_file_task(document_file_id: int):
         db.close()
 
 
+# ─────────────────────────────────────────────────────────────
 @celery_app.task(
     name="rag.vectorize_html_document_task",
     queue="rag-bank-assistant",
     acks_late=True,
 )
 def vectorize_html_document_task(scraped_document_id: int):
+    """Vectoriza un documento HTML extraído por su ID."""
     db = SessionLocal()
     try:
         rag_ingestion_service = get_rag_ingestion_service()
@@ -69,12 +76,14 @@ def vectorize_html_document_task(scraped_document_id: int):
         db.close()
 
 
+# ─────────────────────────────────────────────────────────────
 @celery_app.task(
     name="rag.process_pending_ingestion_task",
     queue="rag-bank-assistant",
     acks_late=True,
 )
 def process_pending_ingestion_task(limit: int = 20):
+    """Lanza tareas pendientes de vectorización de HTML y PDF."""
     db = SessionLocal()
     launched = {
         "html_jobs": 0,
@@ -109,5 +118,44 @@ def process_pending_ingestion_task(limit: int = 20):
             launched["pdf_jobs"],
         )
         return launched
+    finally:
+        db.close()
+
+
+# ─────────────────────────────────────────────────────────────
+@celery_app.task(
+    name="llm.upload_llm_model_task",
+    queue="rag-bank-assistant",
+    acks_late=True,
+)
+def upload_llm_model_task(
+    file_path: str,
+    file_name: str,
+    provider: str,
+    model_name: str,
+    input_token_cost: float,
+    output_token_cost: float,
+    set_as_active: bool,
+):
+    """Sube un modelo LLM a Minio y lo registra en la base de datos."""
+    db = SessionLocal()
+    try:
+        with open(file_path, "rb") as f:
+            file_bytes = f.read()
+        result = upload_llm_model(
+            db=db,
+            file_name=file_name,
+            file_bytes=file_bytes,
+            provider=provider,
+            model_name=model_name,
+            input_token_cost=Decimal(str(input_token_cost)),
+            output_token_cost=Decimal(str(output_token_cost)),
+            set_as_active=set_as_active,
+        )
+        logger.info(f"Modelo {model_name} subido y registrado correctamente.")
+        return result
+    except Exception as exc:
+        logger.exception(f"Error subiendo modelo {model_name}: {exc}")
+        raise
     finally:
         db.close()

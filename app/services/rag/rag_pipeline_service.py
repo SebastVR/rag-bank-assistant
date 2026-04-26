@@ -29,7 +29,11 @@ PDF_TIMEOUT_SECONDS = 60
 
 
 class RagIngestionService:
+    """Servicio para la ingesta y vectorización de documentos HTML y PDF."""
+
+    # ────────────────────────────────────────────────────────────────
     def __init__(self):
+        """Inicializa los componentes de chunking, embeddings y almacenamiento."""
         self.chunker = RecursiveTextChunker(
             chunk_size=settings.rag_chunk_size,
             chunk_overlap=settings.rag_chunk_overlap,
@@ -44,7 +48,9 @@ class RagIngestionService:
         )
         self.storage = S3Storage()
 
+    # ────────────────────────────────────────────────────────────────
     def vectorize_scraped_html(self, db: Session, scraped_document_id: int) -> dict:
+        """Vectoriza el texto de un documento HTML scrapeado y lo almacena."""
         doc = db.get(ScrapedDocument, scraped_document_id)
         if not doc:
             raise ValueError(f"ScrapedDocument {scraped_document_id} not found")
@@ -69,9 +75,11 @@ class RagIngestionService:
 
         return {"scraped_document_id": doc.id, "chunks": len(chunks), "source": "html"}
 
+    # ────────────────────────────────────────────────────────────────
     def process_and_vectorize_pdf_file(
         self, db: Session, document_file_id: int
     ) -> dict:
+        """Procesa y vectoriza un archivo PDF, aplicando OCR si es necesario."""
         file_row = db.get(DocumentFile, document_file_id)
         if not file_row:
             raise ValueError(f"DocumentFile {document_file_id} not found")
@@ -123,7 +131,9 @@ class RagIngestionService:
             "source": "pdf",
         }
 
+    # ────────────────────────────────────────────────────────────────
     def _persist_chunks(self, db: Session, scraped_document_id: int, chunks) -> None:
+        """Guarda los chunks vectorizados en la base de datos y el vector store."""
         texts = [item.content for item in chunks]
         vectors = self.embedder.embed_texts(texts)
 
@@ -169,7 +179,9 @@ class RagIngestionService:
         db.add_all(rows)
         db.flush()
 
+    # ────────────────────────────────────────────────────────────────
     def _store_sections_from_html(self, db: Session, doc: ScrapedDocument) -> None:
+        """Guarda las secciones del documento HTML en la base de datos."""
         headings = []
         if doc.headings:
             try:
@@ -217,13 +229,17 @@ class RagIngestionService:
             )
         db.flush()
 
+    # ────────────────────────────────────────────────────────────────
     def _download_pdf(self, url: str) -> bytes:
+        """Descarga un archivo PDF desde una URL y retorna su contenido en bytes."""
         with httpx.Client(timeout=PDF_TIMEOUT_SECONDS, follow_redirects=True) as client:
             response = client.get(url)
             response.raise_for_status()
             return response.content
 
+    # ────────────────────────────────────────────────────────────────
     def _extract_pdf_text_with_ocr_fallback(self, pdf_bytes: bytes) -> str:
+        """Extrae texto de un PDF, usando OCR si es necesario."""
         reader = PdfReader(BytesIO(pdf_bytes))
         page_texts: List[str] = []
 
@@ -239,7 +255,9 @@ class RagIngestionService:
 
         return "\n\n".join(page_texts)
 
+    # ────────────────────────────────────────────────────────────────
     def _ocr_page(self, pdf_bytes: bytes, page_number: int) -> str:
+        """Realiza OCR sobre una página específica de un PDF."""
         images = pdf2image.convert_from_bytes(
             pdf_bytes,
             dpi=200,
@@ -250,11 +268,15 @@ class RagIngestionService:
             return ""
         return pytesseract.image_to_string(images[0])
 
+    # ────────────────────────────────────────────────────────────────
     def _sanitize_filename(self, value: str) -> str:
+        """Limpia y limita el nombre de archivo para almacenamiento seguro."""
         safe = re.sub(r"[^a-zA-Z0-9_-]", "_", value)
         return safe[:80] or "document"
 
 
+# ────────────────────────────────────────────────────────────────
 @lru_cache(maxsize=1)
 def get_rag_ingestion_service() -> RagIngestionService:
+    """Devuelve una instancia cacheada de RagIngestionService."""
     return RagIngestionService()

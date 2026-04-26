@@ -4,6 +4,9 @@ from app.db.base import Base
 
 
 class DocumentFile(Base):
+    """Archivo de documento asociado a un documento extraído."""
+
+    # ─────────────────────────────────────────────────────────────
     __tablename__ = "document_files"
 
     id = Column(Integer, primary_key=True, autoincrement=True)

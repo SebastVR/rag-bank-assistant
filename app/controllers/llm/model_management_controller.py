@@ -15,16 +15,21 @@ from app.services.s3_storage import S3Storage
 MODEL_FOLDER = "models/llm"
 
 
+# ─────────────────────────────────────────────────────────────
 def _ensure_session(db: Any) -> Session:
+    """Verifica que el objeto db sea una sesión de SQLAlchemy."""
     if not isinstance(db, Session):
         raise TypeError("Este endpoint solo soporta SQLAlchemy Session (APP_ENV=dev)")
     return db
 
 
+# ─────────────────────────────────────────────────────────────
 def _sanitize_filename(value: str) -> str:
+    """Sanitiza el nombre de archivo para almacenamiento seguro."""
     return re.sub(r"[^a-zA-Z0-9._-]", "_", value)
 
 
+# ─────────────────────────────────────────────────────────────
 def upload_llm_model(
     db: Any,
     *,
@@ -36,6 +41,7 @@ def upload_llm_model(
     output_token_cost: Decimal,
     set_as_active: bool,
 ) -> dict[str, Any]:
+    """Sube un modelo LLM a S3 y lo registra en la base de datos."""
     session = _ensure_session(db)
     now = datetime.now(timezone.utc)
 
@@ -91,12 +97,14 @@ def upload_llm_model(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def _resolve_llama_model_path_from_registry(
     session: Session,
     *,
     provider: str,
     model_name: str,
 ) -> str:
+    """Resuelve la ruta S3 de un modelo llama_cpp registrado."""
     row = (
         session.query(LanguageModel)
         .filter(
@@ -125,6 +133,7 @@ def _resolve_llama_model_path_from_registry(
     return f"s3://{storage.bucket_name}/{MODEL_FOLDER}/{filename}"
 
 
+# ─────────────────────────────────────────────────────────────
 def activate_llm_model(
     db: Any,
     *,
@@ -133,6 +142,7 @@ def activate_llm_model(
     model_path: str | None = None,
     set_as_active: bool = True,
 ) -> dict[str, Any]:
+    """Activa un modelo LLM registrado y lo configura como activo si se indica."""
     session = _ensure_session(db)
     normalized_provider = provider.strip().lower()
     resolved_model_name = model_name.strip()
@@ -181,11 +191,13 @@ def activate_llm_model(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def list_llm_model_options(
     db: Any,
     *,
     provider: str | None = None,
 ) -> dict[str, Any]:
+    """Lista las opciones de modelos LLM disponibles por proveedor."""
     session = _ensure_session(db)
 
     query = session.query(LanguageModel)
@@ -213,12 +225,14 @@ def list_llm_model_options(
     }
 
 
+# ─────────────────────────────────────────────────────────────
 def activate_llm_model_by_id(
     db: Any,
     *,
     language_model_id: int,
     set_as_active: bool = True,
 ) -> dict[str, Any]:
+    """Activa un modelo LLM por su ID en la base de datos."""
     session = _ensure_session(db)
     row = session.get(LanguageModel, language_model_id)
     if row is None:
