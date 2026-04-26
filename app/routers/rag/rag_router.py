@@ -16,17 +16,17 @@ from app.db.db_connection import SessionLocal
 from app.models.conversation import Conversation
 from app.models.document_file import DocumentFile
 from app.models.message import Message
+from app.rag.analytics.vector_metrics import get_vectorization_totals
 from app.services.llm.runtime_config_service import get_runtime_llm_config
 from app.services.llm.usage_logging_service import create_llm_usage_log
 from app.services.rag.rag_query_service import RagQueryService
+from app.util.responses import StandardStreamingResponse
 
 # --- Importar función de analytics para reutilizar lógica de listado ---
 try:
     from app.controllers.analytics.analytics_controller import get_recent_conversations
 except ImportError:
     get_recent_conversations = None
-
-router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
 
 
 class RagQuestionRequest(BaseModel):
@@ -52,6 +52,56 @@ class RagChatRequest(BaseModel):
         description="Cantidad de mensajes previos usados como contexto",
     )
     use_rerank: bool = True
+
+
+router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
+
+
+# Endpoint GET para obtener información real de embeddings vectorizados
+@router.get("/embeddings")
+def get_embeddings_info():
+    """
+    Devuelve información real de los embeddings vectorizados.
+    """
+    db = SessionLocal()
+    try:
+        vector_metrics = get_vectorization_totals(db)
+        return {
+            "embedding_model": settings.rag_embedding_model,
+            "vector_dim": 384,  # Puedes parametrizar esto si lo tienes en settings
+            "vectorized_documents": vector_metrics.get("vectorized_documents", 0),
+            "vectorized_pdf_documents": vector_metrics.get(
+                "vectorized_pdf_documents", 0
+            ),
+            "vectorized_chunks": vector_metrics.get("vectorized_chunks", 0),
+        }
+    finally:
+        db.close()
+
+
+# --- Ejemplo de función generadora para chat streaming ---
+def chat_stream_response(question: str):
+    # Aquí deberías usar tu lógica real de streaming LLM
+    # Este es un ejemplo simple que simula chunks
+    import time
+
+    for chunk in [
+        f"Procesando pregunta: {question}",
+        "\nChunk 1...",
+        "\nChunk 2...",
+        "\nRespuesta final.",
+    ]:
+        yield chunk
+        time.sleep(0.5)
+
+
+# Endpoint de chat en streaming
+@router.post("/chat/streaming")
+async def chat_streaming_endpoint(request: RagQuestionRequest):
+    """
+    Endpoint de chat en streaming (respuesta por chunks).
+    """
+    return StandardStreamingResponse(chat_stream_response(request.question))
 
 
 def _resolve_or_create_conversation(db, payload: RagChatRequest) -> Conversation:
