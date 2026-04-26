@@ -4,7 +4,6 @@ import os
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from pydantic import BaseModel, Field
 
 from app.controllers.llm.model_management_controller import (
     activate_llm_model,
@@ -13,27 +12,10 @@ from app.controllers.llm.model_management_controller import (
     upload_llm_model,
 )
 from app.db.db_connection import get_db
+from app.schemas.llm import ActivateModelByIdRequest, ActivateModelRequest
 from app.services.llm.runtime_config_service import get_runtime_llm_config
 
 router = APIRouter(prefix="/api/v1/llm", tags=["llm"])
-
-
-class ActivateModelRequest(BaseModel):
-    provider: str = Field(
-        ...,
-        description="llama_cpp | ollama | chatgpt | openai | claude | bedrock",
-    )
-    model_name: str = Field(..., min_length=1)
-    model_path: str | None = Field(
-        default=None,
-        description=("Opcional. Requerido solo si no se puede inferir para llama_cpp"),
-    )
-    set_as_active: bool = True
-
-
-class ActivateModelByIdRequest(BaseModel):
-    language_model_id: int = Field(..., ge=1)
-    set_as_active: bool = True
 
 
 @router.post("/models/upload")

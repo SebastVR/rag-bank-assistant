@@ -3,7 +3,6 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
 from sqlalchemy import func
 
 from app.celery_worker.tasks import (
@@ -28,33 +27,46 @@ try:
 except ImportError:
     get_recent_conversations = None
 
+# Importar modelos desde schemas/rag
 
-class RagQuestionRequest(BaseModel):
-    question: str = Field(..., min_length=3)
-    use_rerank: bool = True
-
-
-class RagChatRequest(BaseModel):
-    question: str = Field(..., min_length=3)
-    conversation_id: int | None = Field(
-        default=None,
-        description="ID numerico de la conversacion existente",
-    )
-    session_id: str | None = Field(
-        default=None,
-        min_length=3,
-        description="ID de sesion externo; si no existe, se crea conversacion",
-    )
-    history_messages: int = Field(
-        default=6,
-        ge=0,
-        le=50,
-        description="Cantidad de mensajes previos usados como contexto",
-    )
-    use_rerank: bool = True
-
+from app.schemas.rag import (
+    ConversationCreateRequest,
+    ConversationCreateResponse,
+    RagChatRequest,
+    RagQuestionRequest,
+)
 
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
+
+
+# --- NUEVO: Crear conversación vacía ---
+@router.post("/conversations", response_model=ConversationCreateResponse)
+def create_conversation(request: ConversationCreateRequest):
+    db = SessionLocal()
+    try:
+        session_id = request.session_id or str(uuid4())
+        now = datetime.now(timezone.utc)
+        title = request.title or "Chat"
+        row = Conversation(
+            session_id=session_id,
+            title=title,
+            channel="api",
+            created_at=now,
+            updated_at=now,
+        )
+        db.add(row)
+        db.flush()
+        db.refresh(row)
+        return ConversationCreateResponse(
+            id=row.id,
+            session_id=row.session_id,
+            title=row.title,
+            channel=row.channel,
+            created_at=row.created_at.isoformat(),
+            updated_at=row.updated_at.isoformat(),
+        )
+    finally:
+        db.close()
 
 
 # Endpoint GET para obtener información real de embeddings vectorizados

@@ -1,7 +1,6 @@
 from urllib.parse import urlparse
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
 
 from app.controllers.scraping.scraping_controller import (
     get_processed_document,
@@ -9,14 +8,9 @@ from app.controllers.scraping.scraping_controller import (
     process_scraped_html,
     run_crawl,
 )
+from app.schemas.scraping import CrawlRequest
 
 router = APIRouter(prefix="/api/v1/scraping", tags=["scraping"])
-
-
-class CrawlRequest(BaseModel):
-    base_url: str | None = Field(default=None)
-    max_pages: int | None = Field(default=None, ge=1, le=500)
-    timeout: int | None = Field(default=None, ge=5, le=120)
 
 
 def extract_domain(url: str) -> str:

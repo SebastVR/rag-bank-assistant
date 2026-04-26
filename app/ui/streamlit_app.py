@@ -46,6 +46,18 @@ def fetch_recent_conversations(search: str, limit: int = 30) -> list[dict]:
     return data.get("items", [])
 
 
+# --- Nueva función para crear conversación ---
+def create_conversation(
+    title: str | None = None, session_id: str | None = None
+) -> dict:
+    payload = {}
+    if title:
+        payload["title"] = title
+    if session_id:
+        payload["session_id"] = session_id
+    return _post("/api/v1/rag/conversations", payload)
+
+
 def fetch_messages(conversation_id: int, limit: int = 100) -> list[dict]:
     data = _get(f"/api/v1/rag/chat/{conversation_id}/messages", params={"limit": limit})
     return data.get("items", [])
@@ -84,9 +96,16 @@ def render_sidebar(left_col) -> None:
         search_term = st.text_input("Buscar", placeholder="Titulo o session_id")
 
         if st.button("+ Nueva conversacion", use_container_width=True):
-            st.session_state.selected_conversation_id = None
-            st.session_state.chat_session_id = str(uuid4())
-            st.session_state.open_answer = None
+            try:
+                # Puedes personalizar el título si lo deseas, aquí se deja vacío
+                response = create_conversation()
+                st.session_state.selected_conversation_id = response.get("id")
+                st.session_state.chat_session_id = response.get("session_id")
+                st.session_state.open_answer = None
+                st.rerun()
+            except Exception as exc:
+                st.error(f"No se pudo crear la conversación: {exc}")
+                return
 
         try:
             conversations = fetch_recent_conversations(search=search_term)

@@ -1,4 +1,4 @@
-from .analytics_schema import (
+from app.schemas.analytic import (
     AnalyticsKpiResponse,
     CostBreakdownItem,
     DailyCostPoint,

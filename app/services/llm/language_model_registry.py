@@ -37,7 +37,7 @@ DEFAULT_LANGUAGE_MODELS: tuple[LanguageModelSeed, ...] = (
         description="OpenAI ChatGPT low-cost model",
     ),
     LanguageModelSeed(
-        name="anthropic.claude-sonnet-4-5-20250929-v1:0",
+        name="us.anthropic.claude-sonnet-4-5-20250929-v1:0",
         provider="claude",
         input_token_cost=Decimal("18.0"),
         output_token_cost=Decimal("36.0"),

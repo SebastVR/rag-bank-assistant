@@ -7,7 +7,6 @@ from typing import Any, Dict, List
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
-from pydantic import BaseModel, Field
 
 from app.config.settings import settings
 from app.scraping.fetcher import HtmlFetcher
@@ -31,25 +30,6 @@ def save_html_and_upload_s3(
     s3.create_bucket_if_not_exists()
     s3.write_file(s3_folder, fname, html.encode("utf-8"))
     return True
-
-
-class ScrapedSection(BaseModel):
-    heading: str
-    content: str
-
-
-class ScrapedDocument(BaseModel):
-    doc_id: str
-    source: str
-    url: str
-    title: str
-    category: str = "general"
-    content: str
-    sections: List[ScrapedSection] = Field(default_factory=list)
-    headings: List[str] = Field(default_factory=list)
-    internal_links: List[str] = Field(default_factory=list)
-    raw_file_path: str
-    metadata: Dict[str, Any] = Field(default_factory=dict)
 
 
 def is_internal_link(href: str, base_domain: str) -> bool:

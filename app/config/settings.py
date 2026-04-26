@@ -75,7 +75,7 @@ class Settings(BaseSettings):
     llm_model_path: str = "app/rag/Qwen3-VL-4B-Instruct-Q4_K_M.gguf"
     ollama_base_url: str = "http://localhost:11434"
     openai_api_key: str | None = None
-    bedrock_model_id: str = "anthropic.claude-sonnet-4-5-20250929-v1:0"
+    bedrock_model_id: str
     bedrock_max_new_tokens: int = 5000
     bedrock_temperature: float = 0.0
 
